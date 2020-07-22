@@ -1,7 +1,9 @@
 const express = require('express')
 const router = express.Router()
+const cors = require('cors')
 const notes = require('./notes')
 
+router.use(cors())
 router.use(express.json())
 
 router.use('/notes', notes)

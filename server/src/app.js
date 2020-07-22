@@ -10,8 +10,8 @@ require('dotenv').config()
 middlewares(app, endpoints)
 
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(8080, () => {
-    console.log('💻 Listening on http://localhost:8080')
+  const server = app.listen(process.env.PORT || 8080, () => {
+    console.log(`💻 Listening on http://localhost:${server.address().port}`)
     if (endpoints.api) {
       console.log(`API @ ${endpoints.api}`)
     }

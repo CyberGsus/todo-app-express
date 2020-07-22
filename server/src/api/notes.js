@@ -8,7 +8,7 @@ const schema = yup.object().shape({
   title: yup.string().trim().min(3).required(),
   description: yup.string().trim().default('No description'),
   done: yup.boolean().default(false),
-  group: yup.string().nullable().default(null),
+  color: yup.string().default('white'),
 })
 
 notes.get('/', async (req, res, next) => {
@@ -40,14 +40,14 @@ notes.get('/:id', async (req, res, next) => {
 notes.post('/', async (req, res, next) => {
   // TODO: create a todo
   try {
-    const { title, description, done, group } = req.body
+    const { title, description, done, color } = req.body
     await schema.validate({
       title,
       description,
       done,
-      group,
+      color,
     })
-    const got = schema.cast({ title, description, done, group })
+    const got = schema.cast({ title, description, done, color })
     await collection.insert(got)
     res.status(201).json(got)
   } catch (err) {
@@ -61,14 +61,14 @@ notes.post('/', async (req, res, next) => {
 
 notes.put('/', async (req, res, next) => {
   try {
-    const { _id, title, description, done, group } = req.body
+    const { _id, title, description, done, color } = req.body
     await schema.validate({
       title,
       description,
       done,
-      group,
+      color,
     })
-    const cast = schema.cast({ title, description, done, group })
+    const cast = schema.cast({ title, description, done, color })
     cast['_id'] = _id
     const got = await collection.findOne({ _id })
     if (got === null) {

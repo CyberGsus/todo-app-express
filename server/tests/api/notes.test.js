@@ -28,6 +28,7 @@ describe('Creating notes', () => {
       title: 'Example 2',
       description: 'Example valid description',
       done: true,
+      color: '#ff00ff',
     }
     let resp = await request(app).post('/api/v1/notes').send(mockToDo)
     expect(resp.status).toEqual(201)
@@ -103,6 +104,7 @@ describe('Update notes', () => {
       title: 'Do Chores',
       description: 'Do home chores mom said to do',
       done: true,
+      color: '#ff0000',
     })
     const resp = await request(app).put('/api/v1/notes').send(newData)
 
@@ -134,7 +136,7 @@ describe('Delete notes', () => {
       title: 'Dummy Note',
       description: "Assert things don't fail",
       done: false,
-      group: 'tests',
+      color: '#333333',
     }
     const newDummy = (await request(app).post('/api/v1/notes').send(dummy)).body
     expect(newDummy).toMatchObject(dummy)
