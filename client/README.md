@@ -1,24 +1,9 @@
 # client
 
-## Project setup
-```
-yarn install
-```
+The client side for the project,
+using Vue and Vuetify. In development
 
-### Compiles and hot-reloads for development
-```
-yarn serve
-```
+## TODO
 
-### Compiles and minifies for production
-```
-yarn build
-```
-
-### Lints and fixes files
-```
-yarn lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- [ ] Fix dialog recursion when called 2nd time
+- [ ] Create a button & form to add a new note
