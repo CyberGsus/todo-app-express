@@ -8,7 +8,7 @@ const migrateDb = async () => {
       title: 'Example',
       description: 'Example description',
       done: false,
-      color: '#ff00ff',
+      color: '#333333',
     },
   ])
 }

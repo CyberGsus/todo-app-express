@@ -8,7 +8,10 @@ const schema = yup.object().shape({
   title: yup.string().trim().min(3).required(),
   description: yup.string().trim().default('No description'),
   done: yup.boolean().default(false),
-  color: yup.string().default('white'),
+  color: yup
+    .string()
+    .default('#fff')
+    .matches(/^#(?:[0-9a-f]{3}){1,2}$/i),
 })
 
 notes.get('/', async (req, res, next) => {

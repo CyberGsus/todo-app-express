@@ -136,3 +136,4 @@ tags
 #
 server/db/**/*
 */.vscode/
+db/
