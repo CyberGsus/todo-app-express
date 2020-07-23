@@ -1,11 +1,9 @@
-# todo-app
+# client
 
-This is a fullstack starter project
-I'm developing to get better at Nodejs & Vue.
+The client side for the project,
+using Vue and Vuetify. In development
 
-Will also dockerize the app.
+## TODO
 
-## Notes
-
-- Installation of modules is per-se, backend is completely separated from frontend
-- Backend just serves an API with a mongodb database at `/api/v1`, you can use other endpoints to make a static file server
+- [ ] Fix dialog recursion when called 2nd time
+- [ ] Create a button & form to add a new note
