@@ -1,6 +1,6 @@
 
-# Created by https://www.toptal.com/developers/gitignore/api/vim,node
-# Edit at https://www.toptal.com/developers/gitignore?templates=vim,node
+# Created by https://www.toptal.com/developers/gitignore/api/vim,vuejs,node
+# Edit at https://www.toptal.com/developers/gitignore?templates=vim,vuejs,node
 
 ### Node ###
 # Logs
@@ -44,8 +44,7 @@ build/Release
 
 # Dependency directories
 node_modules/
-*/node_modules/
-*/jspm_packages/
+jspm_packages/
 
 # TypeScript v1 declaration files
 typings/
@@ -119,7 +118,8 @@ dist
 [._]*.sw[a-p]
 [._]s[a-rt-v][a-z]
 [._]ss[a-gi-z]
-[._]sw[a-p] 
+[._]sw[a-p]
+
 # Session
 Session.vim
 Sessionx.vim
@@ -132,7 +132,12 @@ tags
 # Persistent undo
 [._]*.un~
 
-# End of https://www.toptal.com/developers/gitignore/api/vim,node
-#
-server/db/**/*
-*/.vscode/
+### Vuejs ###
+# Recommended template: Node.gitignore
+
+dist/
+npm-debug.log
+yarn-error.log
+
+# End of https://www.toptal.com/developers/gitignore/api/vim,vuejs,node
+db/

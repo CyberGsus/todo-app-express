@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
+    "eslint": "^7.5.0",
     "jest": "^26.1.0",
     "monk-middleware-debug": "^0.2.0",
     "nodemon": "^2.0.4",
@@ -27,7 +28,8 @@
   "scripts": {
     "dev": "nodemon src/app.js",
     "start": "node src/app.js",
-    "test": "cross-env NODE_ENV=test jest --verbose",
+    "db": "mkdir -p db; mongod --dbpath db",
+    "test": "yarn db > /dev/null 2>&1 & cross-env NODE_ENV=test jest --verbose",
     "migrate": "node src/migrate.js"
   }
 }
