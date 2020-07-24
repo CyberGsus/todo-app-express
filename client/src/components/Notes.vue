@@ -37,30 +37,42 @@
         </v-card-text>
         <v-divider />
         <v-card-actions>
-          <v-btn text @click="openConfirmationDialog" color="red lighten-2">Delete note</v-btn>
+          <v-btn text @click="openConfirmationDialog" color="red lighten-2"
+            >Delete note</v-btn
+          >
           <v-spacer />
-          <v-btn text @click="updateNote" color="green lighten-1">Save note</v-btn>
+          <v-btn text @click="updateNote" color="green lighten-1"
+            >Save note</v-btn
+          >
           <v-btn text @click="closeDialog" color="blue lighten-1">Close</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
     <!-- Edit note dialog END -->
     <!-- Confirmation dialog -->
-    <v-dialog v-model="confirmationDialog" max-width="600px" @click:outside="closeConfirmationDialog(false)">
+    <v-dialog
+      v-model="confirmationDialog"
+      max-width="600px"
+      @click:outside="closeConfirmationDialog(false)"
+    >
       <v-card color="red" dark>
         <v-card-title class="heading mb-2">
           Delete note?
         </v-card-title>
         <v-card-text>
           <b>
-          Are you sure you want to delete this note? this is unrecoverable!
+            Are you sure you want to delete this note? this is unrecoverable!
           </b>
         </v-card-text>
         <v-divider />
         <v-card-actions class="red darken-2">
-          <v-btn @click="closeConfirmationDialog(true)" text color="white">Yes, I want to delete this note</v-btn>
+          <v-btn @click="closeConfirmationDialog(true)" text color="white"
+            >Yes, I want to delete this note</v-btn
+          >
           <v-spacer />
-          <v-btn @click="closeConfirmationDialog(false)" text color="white">No, let me decide again!</v-btn>
+          <v-btn @click="closeConfirmationDialog(false)" text color="white"
+            >No, let me decide again!</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -82,11 +94,11 @@ import NoteItem from './NoteItem.vue'
 const API_URI = 'http://localhost:8081/api/v1'
 
 const config = {
-  callAPI: false
+  callAPI: false,
 }
 
 const sleepAsync = (millis = 1000) =>
-  new Promise(resolve => setTimeout(resolve, millis))
+  new Promise((resolve) => setTimeout(resolve, millis))
 
 const groupBy = (arr, r = 1) => {
   const newarr = []
@@ -100,7 +112,7 @@ const groupBy = (arr, r = 1) => {
 export default Vue.extend({
   name: 'Notes',
   components: {
-    NoteItem
+    NoteItem,
   },
   data: () => ({
     notes: config.callAPI
@@ -111,19 +123,19 @@ export default Vue.extend({
             title: 'Call Mom',
             description: `She must be very worried. I'd better call her`,
             color: '#000000',
-            done: false
+            done: false,
           },
           {
             _id: 2,
             title: 'Hello World',
             description: 'I am a teapot!',
             done: true,
-            color: '#cccccc'
-          }
+            color: '#cccccc',
+          },
         ],
     noteEdited: {},
     formDialog: false,
-    confirmationDialog: false
+    confirmationDialog: false,
   }),
   async mounted() {
     this.getNotes()
@@ -138,7 +150,7 @@ export default Vue.extend({
       }
     },
     async saveNote({ current, edit }) {
-      this.notes = this.notes.map(note => {
+      this.notes = this.notes.map((note) => {
         if (note === current) {
           return Object.assign(note, edit)
         }
@@ -148,19 +160,19 @@ export default Vue.extend({
 
     async deleteNote({ _id }) {
       // TODO: ASK FOR CONFIRMATION!!!
-      this.notes = this.notes.filter(note => {
+      this.notes = this.notes.filter((note) => {
         return note._id !== _id
       })
     },
 
     isColorDark(color) {
       const rgb = groupBy([...color.slice(1)], 2)
-        .map(a => a.join(''))
-        .map(s => parseInt(s, 16))
-        .map(i => i / 255.0)
+        .map((a) => a.join(''))
+        .map((s) => parseInt(s, 16))
+        .map((i) => i / 255.0)
 
       const lightness = [Math.max, Math.min]
-        .map(f => f.apply(null, rgb))
+        .map((f) => f.apply(null, rgb))
         .reduce((a, b) => (a + b) / 2, 0)
 
       return lightness >= 0.5
@@ -183,29 +195,31 @@ export default Vue.extend({
     },
     openConfirmationDialog() {
       this.formDialog = false
-      const interval = setInterval((function () {
-        clearInterval(interval)
-        this.confirmationDialog = true
-      }).bind(this), 250)
+      const interval = setInterval(
+        function () {
+          clearInterval(interval)
+          this.confirmationDialog = true
+        }.bind(this),
+        250
+      )
     },
     closeConfirmationDialog(value) {
       this.confirmationDialog = false
-      const cb = (function () {
+      const cb = function () {
         this.formDialog = true
-      }).bind(this)
+      }.bind(this)
       if (value === true) {
         console.log('Confirmed!')
         this.deleteNote(this.noteEdited)
-        this.noteEdited = {  }
-      }
-      else {
+        this.noteEdited = {}
+      } else {
         console.log('Phew.')
         const interval = setInterval(() => {
           clearInterval(interval)
           cb()
         }, 250)
       }
-    }
-  }
+    },
+  },
 })
 </script>

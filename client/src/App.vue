@@ -14,7 +14,7 @@ import Notes from './components/Notes.vue'
 export default Vue.extend({
   name: 'App',
   components: {
-    Notes
-  }
+    Notes,
+  },
 })
 </script>
