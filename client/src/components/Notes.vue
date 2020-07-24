@@ -1,11 +1,11 @@
 <template>
   <v-row justify="center">
-    <NoteItem v-for="note in notes" :key="note._id" :note="note" @save-note="submitNote(note)" @delete-note="deleteNote(note)" /> 
+    <NoteItem v-for="note in notes" :key="note._id" :note="note" @note:save="saveNote"  @note:delete="deleteNote"/> 
   </v-row>
 </template>
 
 
-<script lang="ts">
+<script>
 import Vue from 'vue'
 import axios from 'axios'
 import NoteItem from './NoteItem.vue'
@@ -74,35 +74,20 @@ export default Vue.extend({
         await sleepAsync(250)
       }
     },
-    async submitNote() {
-      if (config.callAPI) {
-        try {
-          await axios.put(`${API_URI}/notes/`, this.noteBeingEdited)
-          console.log('Note submitted!')
-        } catch (err) {
-          console.error(err)
+    async saveNote({ current, edit }) {
+      this.notes = this.notes.map((note) => { 
+        if (note === current) {
+          return Object.assign(note, edit)
         }
-      } else {
-        this.notes[this.noteIndex] = Object.assign(
-          this.notes[this.noteIndex],
-          this.noteBeingEdited
-        )
-        await sleepAsync(150)
-      }
+        return note
+      })
     },
-    async deleteNote(note) {
-      if (config.callAPI) {
-        try {
-          await axios({
-            method: 'delete',
-            url: `${API_URI}/notes/${note._id}`
-          })
-        } catch (err) {
-          console.error(err)
-        }
-      } else {
-        await sleepAsync(150)
-      }
+
+    async deleteNote(event) {
+      // TODO: ASK FOR CONFIRMATION!!!
+      this.notes = this.notes.filter((note) => {
+        return note !== event
+      })
     },
 
     isColorDark(color) {
