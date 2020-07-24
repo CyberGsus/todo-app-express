@@ -54,6 +54,7 @@
       v-model="confirmationDialog"
       max-width="600px"
       @click:outside="closeConfirmationDialog(false)"
+      @keydown="dialogKeyDown"
     >
       <v-card color="red" dark>
         <v-card-title class="heading mb-2">
@@ -209,15 +210,22 @@ export default Vue.extend({
         this.formDialog = true
       }.bind(this)
       if (value === true) {
-        console.log('Confirmed!')
+        // Confirmed
         this.deleteNote(this.noteEdited)
         this.noteEdited = {}
       } else {
+        // Phew.
         console.log('Phew.')
         const interval = setInterval(() => {
           clearInterval(interval)
           cb()
         }, 250)
+      }
+    },
+    dialogKeyDown({ key, keyCode }) {
+      if (key === 'Escape' || keyCode === 27) {
+        if (this.confirmationDialog) this.closeConfirmationDialog(false)
+        else this.closeDialog()
       }
     },
   },
