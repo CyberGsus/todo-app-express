@@ -1,7 +1,5 @@
 <template>
   <v-col cols="6">
-    <v-dialog v-model="formDialog" max-width="600px" fullscreen>
-      <template v-slot:activator="{ on, attrs }" class="mb-3">
         <!-- Note card -->
         <v-card
           min-width="400px"
@@ -27,80 +25,76 @@
             <v-btn
               text
               :color="note.color"
-              v-on="on"
-              @click="noteEdited = Object.assign({}, note)"
-              v-bind="attrs"
+              @click="$emit('note:edit', note)"
               >Edit note
             </v-btn>
           </v-card-actions>
         </v-card>
-      </template>
       <!-- Note card END -->
       <!-- Edit note form -->
-      <v-card>
-        <v-card-title class="heading mb-2 yellow lighten-2"
-          >Edit note</v-card-title
-        >
-        <v-card-text>
-          <v-container fluid>
-            <v-row>
-              <v-col cols="12">
-                <v-text-field
-                  label="Title"
-                  required
-                  v-model="noteEdited.title"
-                  outlined
-                />
-                <v-textarea
-                  clearable
-                  v-model="noteEdited.description"
-                  label="Description"
-                  outlined
-                />
-              </v-col>
-            </v-row>
-            <v-row justify="space-between">
-              <v-col cols="9">
-                <v-checkbox v-model="noteEdited.done" label="Done" />
-              </v-col>
-              <v-spacer />
-              <v-col>
-                <v-color-picker hide-inputs v-model="noteEdited.color" />
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
-        <v-divider />
-        <v-card-actions>
-          <v-btn
-            @click="
-              $emit('note:delete', note)
-              formDialog = false
-            "
-            text
-            color="red lighten-2"
-            >Delete note</v-btn
-          >
-          <v-spacer />
-          <v-btn
-            @click="$emit('note:save', { current: note, edit: noteEdited })"
-            text
-            color="green lighten-1"
-            >Save note</v-btn
-          >
-          <v-btn
-            text
-            @click="
-              formDialog = false
-              noteEdited = {}
-            "
-            color="blue lighten-1"
-            >Close</v-btn
-          >
-        </v-card-actions>
-      </v-card>
+      <!-- <v-card> -->
+      <!--   <v-card-title class="heading mb-2 yellow lighten-2" -->
+      <!--     >Edit note</v-card-title -->
+      <!--   > -->
+      <!--   <v-card-text> -->
+      <!--     <v-container fluid> -->
+      <!--       <v-row> -->
+      <!--         <v-col cols="12"> -->
+      <!--           <v-text-field -->
+      <!--             label="Title" -->
+      <!--             required -->
+      <!--             v-model="noteEdited.title" -->
+      <!--             outlined -->
+      <!--           /> -->
+      <!--           <v-textarea -->
+      <!--             clearable -->
+      <!--             v-model="noteEdited.description" -->
+      <!--             label="Description" -->
+      <!--             outlined -->
+      <!--           /> -->
+      <!--         </v-col> -->
+      <!--       </v-row> -->
+      <!--       <v-row justify="space-between"> -->
+      <!--         <v-col cols="9"> -->
+      <!--           <v-checkbox v-model="noteEdited.done" label="Done" /> -->
+      <!--         </v-col> -->
+      <!--         <v-spacer /> -->
+      <!--         <v-col> -->
+      <!--           <v-color-picker hide-inputs v-model="noteEdited.color" /> -->
+      <!--         </v-col> -->
+      <!--       </v-row> -->
+      <!--     </v-container> -->
+      <!--   </v-card-text> -->
+      <!--   <v-divider /> -->
+      <!--   <v-card-actions> -->
+      <!--     <v-btn -->
+      <!--       @click=" -->
+      <!--         $emit('note:delete', note) -->
+      <!--         formDialog = false -->
+      <!--       " -->
+      <!--       text -->
+      <!--       color="red lighten-2" -->
+      <!--       >Delete note</v-btn -->
+      <!--     > -->
+      <!--     <v-spacer /> -->
+      <!--     <v-btn -->
+      <!--       @click="$emit('note:save', { current: note, edit: noteEdited })" -->
+      <!--       text -->
+      <!--       color="green lighten-1" -->
+      <!--       >Save note</v-btn -->
+      <!--     > -->
+      <!--     <v-btn -->
+      <!--       text -->
+      <!--       @click=" -->
+      <!--         formDialog = false -->
+      <!--         noteEdited = {} -->
+      <!--       " -->
+      <!--       color="blue lighten-1" -->
+      <!--       >Close</v-btn -->
+      <!--     > -->
+      <!--   </v-card-actions> -->
+      <!-- </v-card> -->
       <!-- Edit note form END -->
-    </v-dialog>
   </v-col>
 </template>
 
