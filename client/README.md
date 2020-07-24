@@ -10,7 +10,7 @@ using Vue and Vuetify. In development
   - [x] Make an event listener to make the form appear
   - [x] Use that to make the dialog appear
 - [x] Make a dialog for confirm deleting a note
-  - [ ] Actually delete the note
+  - [x] Actually delete the note
 - [ ] Create a button & form to add a new note
 
 - [ ] Clean attachment to API via environment variable
