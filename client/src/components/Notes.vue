@@ -1,90 +1,109 @@
 <template>
-  <v-row justify="center">
-    <!-- edit note dialog -->
-    <v-dialog v-model="formDialog" fullscreen>
-      <v-card>
-        <v-card-title class="heading mb-2 yellow lighten-2"
-          >Edit note</v-card-title
-        >
-        <v-card-text>
-          <v-container fluid>
-            <v-row>
-              <v-col cols="12">
-                <v-text-field
-                  label="Title"
-                  required
-                  v-model="noteEdited.title"
-                  outlined
-                />
-                <v-textarea
-                  clearable
-                  v-model="noteEdited.description"
-                  label="Description"
-                  outlined
-                />
+  <v-container>
+    <v-row justify="center">
+      <!-- edit note dialog -->
+      <v-dialog v-model="formDialog" fullscreen>
+        <v-card>
+          <v-card-title class="heading mb-2 yellow lighten-2"
+            >Edit note</v-card-title
+          >
+          <v-card-text>
+            <v-container fluid>
+              <v-row>
+                <v-col cols="12" sm="12">
+                  <v-text-field
+                    label="Title"
+                    required
+                    v-model="noteEdited.title"
+                    outlined
+                  />
+                  <v-textarea
+                    clearable
+                    v-model="noteEdited.description"
+                    label="Description"
+                    outlined
+                  />
+                </v-col>
+              </v-row>
+              <v-row justify="space-between">
+                <v-col cols="9">
+                  <v-checkbox v-model="noteEdited.done" label="Done" />
+                </v-col>
+                <v-spacer />
+                <v-col>
+                  <v-color-picker hide-inputs v-model="noteEdited.color" />
+                </v-col>
+              </v-row>
+            </v-container>
+          </v-card-text>
+          <v-divider />
+          <v-card-actions>
+            <v-btn text @click="openConfirmationDialog" color="red lighten-2"
+              >Delete note</v-btn
+            >
+            <v-spacer />
+            <v-btn text @click="updateNote" color="green lighten-1"
+              >Save note</v-btn
+            >
+            <v-btn text @click="closeDialog" color="blue lighten-1"
+              >Close</v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <!-- Edit note dialog END -->
+      <!-- Confirmation dialog -->
+      <v-dialog
+        v-model="confirmationDialog"
+        max-width="600px"
+        @click:outside="closeConfirmationDialog(false)"
+        @keydown="dialogKeyDown"
+      >
+        <v-card color="red" dark>
+          <v-card-title class="heading mb-2">
+            <v-row align="center">
+              <v-col cols="1">
+                <v-icon>mdi-alert</v-icon>
               </v-col>
+
+              Delete note?
             </v-row>
-            <v-row justify="space-between">
-              <v-col cols="9">
-                <v-checkbox v-model="noteEdited.done" label="Done" />
-              </v-col>
-              <v-spacer />
-              <v-col>
-                <v-color-picker hide-inputs v-model="noteEdited.color" />
-              </v-col>
-            </v-row>
-          </v-container>
-        </v-card-text>
-        <v-divider />
-        <v-card-actions>
-          <v-btn text @click="openConfirmationDialog" color="red lighten-2"
-            >Delete note</v-btn
-          >
-          <v-spacer />
-          <v-btn text @click="updateNote" color="green lighten-1"
-            >Save note</v-btn
-          >
-          <v-btn text @click="closeDialog" color="blue lighten-1">Close</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <!-- Edit note dialog END -->
-    <!-- Confirmation dialog -->
-    <v-dialog
-      v-model="confirmationDialog"
-      max-width="600px"
-      @click:outside="closeConfirmationDialog(false)"
-      @keydown="dialogKeyDown"
-    >
-      <v-card color="red" dark>
-        <v-card-title class="heading mb-2">
-          Delete note?
-        </v-card-title>
-        <v-card-text>
-          <b>
-            Are you sure you want to delete this note? this is unrecoverable!
-          </b>
-        </v-card-text>
-        <v-divider />
-        <v-card-actions class="red darken-2">
-          <v-btn @click="closeConfirmationDialog(true)" text color="white"
-            >Yes, I want to delete this note</v-btn
-          >
-          <v-spacer />
-          <v-btn @click="closeConfirmationDialog(false)" text color="white"
-            >No, let me decide again!</v-btn
-          >
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-    <!-- Confirmation dialog END -->
-    <NoteItem
-      v-for="note in notes"
-      :key="note._id"
-      :note="note"
-      @note:edit="editNote"
-    />
-  </v-row>
+          </v-card-title>
+          <v-card-text color="white">
+            <b>
+              Are you sure you want to delete this note?<br />
+              This is unrecoverable!
+            </b>
+          </v-card-text>
+          <v-divider />
+          <v-card-actions class="pa-2 red darken-2">
+            <v-btn
+              text
+              icon
+              @click="closeConfirmationDialog(true)"
+              color="white"
+              ><v-icon>mdi-delete</v-icon></v-btn
+            >
+            <v-spacer />
+            <v-btn
+              text
+              icon
+              @click="closeConfirmationDialog(false)"
+              color="white"
+              ><v-icon>mdi-cancel</v-icon></v-btn
+            >
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <!-- Confirmation dialog END -->
+      <NoteItem
+        v-for="note in notes"
+        :key="note._id"
+        :note="note"
+        @note:edit="editNote"
+      />
+    </v-row>
+  </v-container>
 </template>
 
 <script>
@@ -150,9 +169,9 @@ export default Vue.extend({
         await sleepAsync(250)
       }
     },
-    async saveNote({ current, edit }) {
+    async saveNote({ current: { _id }, edit }) {
       this.notes = this.notes.map((note) => {
-        if (note === current) {
+        if (note._id === _id) {
           return Object.assign(note, edit)
         }
         return note
@@ -212,10 +231,9 @@ export default Vue.extend({
       if (value === true) {
         // Confirmed
         this.deleteNote(this.noteEdited)
-        this.noteEdited = {}
+        this.closeDialog()
       } else {
         // Phew.
-        console.log('Phew.')
         const interval = setInterval(() => {
           clearInterval(interval)
           cb()

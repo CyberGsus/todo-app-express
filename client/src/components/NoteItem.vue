@@ -1,5 +1,5 @@
 <template>
-  <v-col cols="6">
+  <v-col cols="6" sm="12" md="6" lg="3" class="ma-3" align-self="center">
     <!-- Note card -->
     <v-card
       min-width="400px"
