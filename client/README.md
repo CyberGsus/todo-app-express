@@ -38,6 +38,10 @@ using Vue and Vuetify. In development
     - [ ] `confirmation:dismiss`
     - [ ] `confirmation:accept`
 
+- [ ] Organize events
+
+  - [ ] `note:edit:close` to `note:dismiss`
+
 - [ ] Better looking cards
 
   - [ ] Make card description background a % lighter/darker color of the `note.color`
