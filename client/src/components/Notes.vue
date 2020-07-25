@@ -71,7 +71,7 @@
           </v-card-title>
           <v-card-text color="white">
             <b>
-              Are you sure you want to delete this note?<br />
+              Are you sure you want to delete note "{{ noteEdited.title }}" ?<br />
               This is unrecoverable!
             </b>
           </v-card-text>
@@ -201,8 +201,8 @@ export default Vue.extend({
       this.noteEdited = Object.assign({}, note)
       this.formDialog = true
     },
-    closeDialog() {
-      this.noteEdited = {}
+    closeDialog(removeNoteData = true) {
+      if (removeNoteData) this.noteEdited = {}
       this.formDialog = false
     },
     updateNote() {
@@ -231,7 +231,9 @@ export default Vue.extend({
       if (value === true) {
         // Confirmed
         this.deleteNote(this.noteEdited)
-        this.closeDialog()
+        this.closeDialog(false)
+        // TODO: add a catcher for API error
+        this.$emit('alert:show', { mode: 'ok', text: `Note "${this.noteEdited.title}" deleted successfully` })
       } else {
         // Phew.
         const interval = setInterval(() => {
