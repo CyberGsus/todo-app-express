@@ -1,96 +1,70 @@
 <template>
   <v-container>
     <v-row justify="center">
-      <!-- edit note dialog -->
-      <v-dialog v-model="formDialog" fullscreen>
-        <v-card>
-          <v-card-title class="heading mb-2 yellow lighten-2"
-            >Edit note</v-card-title
-          >
-          <v-card-text>
-            <v-container fluid>
-              <v-row>
-                <v-col cols="12" sm="12">
-                  <v-text-field
-                    label="Title"
-                    required
-                    v-model="noteEdited.title"
-                    outlined
-                  />
-                  <v-textarea
-                    clearable
-                    v-model="noteEdited.description"
-                    label="Description"
-                    outlined
-                  />
-                </v-col>
-              </v-row>
-              <v-row justify="space-between">
-                <v-col cols="9">
-                  <v-checkbox v-model="noteEdited.done" label="Done" />
-                </v-col>
-                <v-spacer />
-                <v-col>
-                  <v-color-picker hide-inputs v-model="noteEdited.color" />
-                </v-col>
-              </v-row>
-            </v-container>
-          </v-card-text>
-          <v-divider />
-          <v-card-actions>
-            <v-btn text @click="openConfirmationDialog" color="red lighten-2"
-              >Delete note</v-btn
-            >
-            <v-spacer />
-            <v-btn text @click="updateNote" color="green lighten-1"
-              >Save note</v-btn
-            >
-            <v-btn text @click="closeDialog" color="blue lighten-1"
-              >Close</v-btn
-            >
-          </v-card-actions>
-        </v-card>
-      </v-dialog>
-      <!-- Edit note dialog END -->
-      <!-- Confirmation dialog -->
+      <NoteDialog
+        :mode="noteFormMode"
+        @keydown="dialogKeyDown"
+        ref="noteForm"
+        @note:delete:confirm="openConfirmationDialog"
+        @note:update="updateNote"
+        @note:edit:close="closeDialog"
+        @note:dismiss="openConfirmationDialog($event, 'confirmDismiss')"
+        @note:submit="openConfirmationDialog($event, 'confirmAdd')"
+      />
       <v-dialog
         v-model="confirmationDialog"
         max-width="600px"
         @click:outside="closeConfirmationDialog(false)"
         @keydown="dialogKeyDown"
       >
-        <v-card color="red" dark>
+        <v-card :color="confirmDialogColor" dark>
           <v-card-title class="heading mb-2">
             <v-row align="center">
               <v-col cols="1">
                 <v-icon>mdi-alert</v-icon>
               </v-col>
 
-              Delete note?
+              {{ confirmDialogTitle }}?
             </v-row>
           </v-card-title>
           <v-card-text color="white">
-            <b>
+            <b v-if="confirmationDialogMode === 'delete'">
               Are you sure you want to delete note "{{ noteEdited.title }}" ?<br />
               This is unrecoverable!
             </b>
+            <template v-else>
+              <b
+                >Are you sure you want to
+                {{
+                  confirmationDialogMode.endsWith('Add') ? 'submit' : 'discard'
+                }}
+                this note?</b
+              >
+              <v-row>
+                <v-col cols="1" offset="1">
+                  <NoteItem :note="noteEdited" />
+                </v-col>
+              </v-row>
+            </template>
           </v-card-text>
           <v-divider />
-          <v-card-actions class="pa-2 red darken-2">
+          <v-card-actions
+            :class="['pa-2', confirmDialogColor.split(' ')[0], 'darken-3']"
+          >
             <v-btn
               text
-              icon
+              
               @click="closeConfirmationDialog(true)"
               color="white"
-              ><v-icon>mdi-delete</v-icon></v-btn
+              ><v-icon>mdi-checkbox-marked-circle</v-icon>Yes</v-btn
             >
             <v-spacer />
             <v-btn
               text
-              icon
+
               @click="closeConfirmationDialog(false)"
               color="white"
-              ><v-icon>mdi-cancel</v-icon></v-btn
+              >No <v-icon>mdi-cancel</v-icon></v-btn
             >
           </v-card-actions>
         </v-card>
@@ -100,16 +74,23 @@
         v-for="note in notes"
         :key="note._id"
         :note="note"
+        editable
         @note:edit="editNote"
+        @note:delete="openConfirmationDialog($event, 'delete', false)"
       />
     </v-row>
+    <v-card-text style="height: 100px; position: relative;" >
+      <v-btn absolute dark fab top right color="pink" @click="newNote"
+        ><v-icon>mdi-plus</v-icon></v-btn
+      >
+    </v-card-text>
   </v-container>
 </template>
 
 <script>
-import Vue from 'vue'
 import axios from 'axios'
 import NoteItem from './NoteItem.vue'
+import NoteDialog from './NoteDialog.vue'
 
 const API_URI = 'http://localhost:8081/api/v1'
 
@@ -118,7 +99,7 @@ const config = {
 }
 
 const sleepAsync = (millis = 1000) =>
-  new Promise((resolve) => setTimeout(resolve, millis))
+  new Promise(resolve => setTimeout(resolve, millis))
 
 const groupBy = (arr, r = 1) => {
   const newarr = []
@@ -129,10 +110,11 @@ const groupBy = (arr, r = 1) => {
   return newarr
 }
 
-export default Vue.extend({
+export default {
   name: 'Notes',
   components: {
     NoteItem,
+    NoteDialog,
   },
   data: () => ({
     notes: config.callAPI
@@ -153,13 +135,16 @@ export default Vue.extend({
             color: '#cccccc',
           },
         ],
+    noteUpdated: false,
     noteEdited: {},
-    formDialog: false,
+    noteFormMode: 'edit',
     confirmationDialog: false,
+    confirmationDialogMode: 'delete',
+    comingFromDialog: false,
   }),
-  async mounted() {
-    this.getNotes()
-  },
+  // async mounted() {
+  //   this.getNotes()
+  // },
   methods: {
     async getNotes() {
       if (config.callAPI) {
@@ -169,8 +154,13 @@ export default Vue.extend({
         await sleepAsync(250)
       }
     },
+    async createNote({ title, description, color }) {
+      const note = { title, description, color }
+      note._id = Math.max.apply(null, this.notes.map(n => n._id)) + 1
+      this.notes.push(note)
+    },
     async saveNote({ current: { _id }, edit }) {
-      this.notes = this.notes.map((note) => {
+      this.notes = this.notes.map(note => {
         if (note._id === _id) {
           return Object.assign(note, edit)
         }
@@ -180,41 +170,63 @@ export default Vue.extend({
 
     async deleteNote({ _id }) {
       // TODO: ASK FOR CONFIRMATION!!!
-      this.notes = this.notes.filter((note) => {
+      this.notes = this.notes.filter(note => {
         return note._id !== _id
       })
     },
 
     isColorDark(color) {
       const rgb = groupBy([...color.slice(1)], 2)
-        .map((a) => a.join(''))
-        .map((s) => parseInt(s, 16))
-        .map((i) => i / 255.0)
+        .map(a => a.join(''))
+        .map(s => parseInt(s, 16))
+        .map(i => i / 255.0)
 
       const lightness = [Math.max, Math.min]
-        .map((f) => f.apply(null, rgb))
+        .map(f => f.apply(null, rgb))
         .reduce((a, b) => (a + b) / 2, 0)
 
       return lightness >= 0.5
     },
+    newNote() {
+      this.noteFormMode = 'create'
+      this.$refs.noteForm.open()
+    },
     editNote(note) {
+      this.noteFormMode = 'edit'
       this.noteEdited = Object.assign({}, note)
-      this.formDialog = true
+      this.$refs.noteForm.open(note)
     },
     closeDialog(removeNoteData = true) {
-      if (removeNoteData) this.noteEdited = {}
-      this.formDialog = false
+      this.$refs.noteForm.close(removeNoteData)
+      if (this.noteUpdated) {
+        this.$emit('alert:show', {
+          mode: 'ok',
+          text: `Note "<strong>${this.noteEdited.title}</strong>" updated`,
+        })
+        this.noteUpdated = false
+      }
     },
-    updateNote() {
-      this.notes = this.notes.map((note) => {
-        if (note._id === this.noteEdited._id) {
-          return Object.assign(note, this.noteEdited)
+    updateNote({ current: { _id }, edit }) {
+      this.noteUpdated = true
+      this.notes = this.notes.map(note => {
+        if (note._id === _id) {
+          return Object.assign(note, edit)
         }
         return note
       })
     },
-    openConfirmationDialog() {
-      this.formDialog = false
+    openConfirmationDialog(note, mode = 'delete', fromDialog = true) {
+      this.confirmationDialogMode =
+        ['delete', 'confirmDismiss', 'confirmAdd'].indexOf(mode) !== -1
+          ? mode
+          : this.confirmationDialogMode
+
+      this.comingFromDialog = fromDialog
+      if (fromDialog) {
+        
+        this.$refs.noteForm.close(false)
+        this.noteEdited = Object.assign({}, note)
+      }
       const interval = setInterval(
         function () {
           clearInterval(interval)
@@ -223,31 +235,69 @@ export default Vue.extend({
         250
       )
     },
-    closeConfirmationDialog(value) {
+    closeConfirmationDialog(confirmed) {
       this.confirmationDialog = false
       const cb = function () {
-        this.formDialog = true
+        this.$refs.noteForm.open()
       }.bind(this)
-      if (value === true) {
+      if (confirmed === true ) {
         // Confirmed
-        this.deleteNote(this.noteEdited)
         this.closeDialog(false)
+        this.afterConfirmation(this.noteEdited).then(([alert, alertVerb, noteEdited]) => {
+          if (alert) {
+          this.$emit('alert:show', {
+            mode: 'ok',
+            text: `Note "<strong>${noteEdited.title}</strong>" ${alertVerb} successfully`,
+          })
+          }
+        })
         // TODO: add a catcher for API error
-        this.$emit('alert:show', { mode: 'ok', text: `Note "${this.noteEdited.title}" deleted successfully` })
-      } else {
+      } else if (this.comingFromDialog) {
         // Phew.
         const interval = setInterval(() => {
           clearInterval(interval)
           cb()
         }, 250)
       }
+      this.noteUpdated = false
+      this.comingFromDialog = false
     },
     dialogKeyDown({ key, keyCode }) {
-      if (key === 'Escape' || keyCode === 27) {
+      if (key.toLowerCase() === 'Escape' || keyCode === 27) {
         if (this.confirmationDialog) this.closeConfirmationDialog(false)
         else this.closeDialog()
       }
     },
+    log: console.log,
   },
-})
+  computed: {
+    confirmDialogTitle() {
+      return {
+        delete: 'Delete Note',
+        confirmDismiss: 'Discard Note',
+        confirmAdd: 'Save Note',
+      }[this.confirmationDialogMode]
+    },
+    confirmDialogColor() {
+      return {
+        delete: 'red',
+        confirmDismiss: 'blue darken-2',
+        confirmAdd: 'green',
+      }[this.confirmationDialogMode]
+    },
+    afterConfirmation() {
+      const cb = {
+        delete: [this.deleteNote, 'deleted'],
+        confirmAdd: [this.createNote, 'created'],
+        confirmDismiss: [() => false, null],
+      }[this.confirmationDialogMode]
+
+      return async (note) => {
+        let answer = await cb[0](note)
+        answer = typeof answer === 'boolean' ? answer : true
+        return [answer, cb[1], note]
+      }
+    },
+  },
+}
 </script>

@@ -2,14 +2,14 @@
   <v-container>
     <v-alert
       prominent
+      text
       border="right"
       :color="color"
       mode="out-in"
       transition="slide-y-transition"
       v-model="active"
     >
-      <div :class="textColor">
-        {{ text }}
+      <div v-html="text">
       </div>
     </v-alert>
   </v-container>
@@ -29,7 +29,7 @@ export default {
   computed: {
     color() {
       return [
-        'light-green',
+        'green',
         'orange lighten-1',
         'red lighten-1'
       ][this.mode]

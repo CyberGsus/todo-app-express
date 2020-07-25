@@ -8,23 +8,36 @@
     >
       <v-container>
         <v-card-title class="headline mb-1">
-          {{ note.title }}
-          <v-spacer />
-          <v-icon v-if="note.done" color="green">mdi-check-bold</v-icon>
+          <v-row>
+            <v-col cols="8">
+              {{ note.title }}
+            </v-col>
+            <v-col cols="1">
+              <v-avatar :color="note.color" tile />
+            </v-col>
+            <v-col offset="2" cols="1">
+              <v-icon v-if="note.done" color="green">mdi-check-bold</v-icon>
+            </v-col>
+          </v-row>
         </v-card-title>
       </v-container>
       <v-divider />
       <v-row class="px-3">
         <v-card-text>
-          <v-col cols="11">
+          <v-col cols="10">
             <p>{{ note.description }}</p>
           </v-col>
         </v-card-text>
       </v-row>
-      <v-card-actions>
-        <v-btn text :color="note.color" @click="$emit('note:edit', note)"
-          >Edit note
+      <v-card-actions v-if="editable">
+        <v-btn
+          text
+          :color="note.color"
+          @click="$emit('note:edit', note)"
+          >Edit
         </v-btn>
+        <v-spacer />
+          <v-btn text icon color="red lighten-2" @click="$emit('note:delete', note)"><v-icon>mdi-delete</v-icon></v-btn>
       </v-card-actions>
     </v-card>
     <!-- Note card END -->
@@ -32,11 +45,14 @@
 </template>
 
 <script>
-import Vue from 'vue'
-
-export default Vue.extend({
+import { getColorLightness } from '../helpers/colors'
+export default {
   name: 'NoteItem',
   props: {
+    editable: {
+      type: Boolean,
+      default: false
+    },
     note: {
       title: {
         type: String,
@@ -71,34 +87,8 @@ export default Vue.extend({
     },
   }),
   methods: {
-    groupBy(arr, r = 2) {
-      const newarr = []
-      if (r === 0) return []
-      for (let i = 0; i < arr.length; i += r) {
-        newarr.push(arr.slice(i, i + r))
-      }
-      return newarr
-    },
-    getLightness(color) {
-      let colorVal = color.slice(1)
-      if (colorVal.length == 3) {
-        colorVal = [...colorVal].map((i) => i.repeat(2))
-      } else {
-        colorVal = this.groupBy([...colorVal], 2).map((a) => a.join(''))
-      }
-      return (
-        colorVal
-          .map((s) => parseInt(s, 16) / 255) // parse hex to number and get them into 0-1 range
-          .map((_, __, arr) => arr.slice()) // generate copies of the array
-          .slice(0, 2) // select only 2
-          // Convert into min and max of the array
-          .map((arr, i) => Math[['max', 'min'][i % 2]].apply(null, arr))
-          // median
-          .reduce((a, b, i) => (a + b) / (i + 1), 0)
-      )
-    },
     isLightColor(color) {
-      return this.getLightness(color) > 0.5
+      return getColorLightness(color) > 0.5
     },
     deleteNote() {
       console.log('Delete note', this.note)
@@ -109,5 +99,5 @@ export default Vue.extend({
       // emit an event to save the note
     },
   },
-})
+}
 </script>
