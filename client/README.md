@@ -3,6 +3,37 @@
 The client side for the project,
 using Vue and Vuetify. In development
 
+## Setup
+
+These are the steps to setup client-only mode:
+
+1. Clone the repository
+
+```bash
+git clone https://github.com/CyberGsus/todo-app-express`
+```
+
+2. Go to the directory
+
+```bash
+cd todo-app-express/client
+```
+
+3. Install packages (`yarn` recommended)
+
+```bash
+yarn install
+```
+
+4. Have some fun!
+   Use
+
+```
+yarn serve
+```
+
+to spin up the development environment
+
 ## TODO
 
 - [x] Fix dialog recursion when called 2nd time
