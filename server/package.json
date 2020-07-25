@@ -25,8 +25,8 @@
     "singleQuote": true
   },
   "scripts": {
-    "dev": "nodemon src/app.js",
-    "start": "node src/app.js",
+    "dev": "yarn db > /dev/null 2>&1 & nodemon src/app.js",
+    "start": "yarn db > /dev/null 2>&1 & node src/app.js",
     "db": "mkdir -p db; killall mongod; mongod --dbpath db",
     "test": "yarn db > /dev/null 2>&1 & cross-env NODE_ENV=test jest --verbose; killall mongod",
     "migrate": "yarn db > /dev/null 2>&1 & node src/migrate.js; killall mongod"
