@@ -9,8 +9,7 @@
       transition="slide-y-transition"
       v-model="active"
     >
-      <div v-html="text">
-      </div>
+      <div v-html="text"></div>
     </v-alert>
   </v-container>
 </template>
@@ -21,23 +20,17 @@ export default {
   data: () => ({
     active: false,
     mode: 0,
-    text: ''
+    text: '',
   }),
   props: {
     content: String,
   },
   computed: {
     color() {
-      return [
-        'green',
-        'orange lighten-1',
-        'red lighten-1'
-      ][this.mode]
+      return ['green', 'orange lighten-1', 'red lighten-1'][this.mode]
     },
     textColor() {
-      return this.mode > 0 
-        ? 'white--text'
-        : 'black--text'
+      return this.mode > 0 ? 'white--text' : 'black--text'
     },
   },
   methods: {

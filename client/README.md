@@ -34,7 +34,11 @@ yarn serve
 
 to spin up the development environment
 
-## TODO
+## :bug: Bugs
+
+- [ ] Note does not update `done` property when clicked, if it has been recently added to the notes list
+
+## :notebook: TODO
 
 - [x] Fix dialog recursion when called 2nd time
 - [x] Make a dialog for confirm deleting a note
@@ -54,29 +58,29 @@ to spin up the development environment
   - [x] Should check title
   - [x] Should add the note to the list on confirmation
 
-- [ ] Separate the confirmation dialog into a new component
+- [x] Separate the confirmation dialog into a new component
 
-  - [ ] Props
+  - [x] Props
 
-    - Color (default 'white')
     - Title\* (required)
     - DismissMessage (default 'No')
     - AcceptText (default 'Yes')
 
-  - [ ] `<slot>` for message
+  - [x] `<slot>` for message
 
-  - [ ] Re-assign events to connect back to `Notes`
-    - [ ] `confirmation:dismiss`
-    - [ ] `confirmation:accept`
+  - [x] Re-assign events to connect back to `Notes`
+    - [x] `confirm:dismiss`
+    - [x] `confirm:accept`
 
-- [ ] Organize events
+- [x] Organize events
 
-  - [ ] `note:edit:close` to `note:dismiss`
+  - [x] `note:edit:close` to `note:dismiss`
 
 - [ ] Better looking cards
 
-  - [ ] Make card description background a % lighter/darker color of the `note.color`
-  - [ ] Make card title background `note.color`
+  - [x] Make card description background a % lighter/darker color of the `note.color`
+  - [x] Make card title background `note.color`
+  - [ ] Fix purple-ish cards
 
 - [ ] Clean attachment to API via environment variable
 - [ ] Make attachment to API actually work

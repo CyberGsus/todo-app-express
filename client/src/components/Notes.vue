@@ -8,10 +8,12 @@
         @note:delete:confirm="openConfirmationDialog"
         @note:update="updateNote"
         @note:edit:close="closeDialog"
-        @note:dismiss="openConfirmationDialog($event, 'confirmDismiss')"
+        @note:dismiss="dismissNote"
         @note:submit="openConfirmationDialog($event, 'confirmAdd')"
       />
-      <v-dialog
+      <note-confirm :note="noteEdited" ref="confirm" :mode="confirmationDialogMode"
+        @confirm:accept="closeConfirmationDialog(true)" @confirm:dismiss="closeConfirmationDialog(false)" @confirm:keydown="dialogKeyDown" />
+      <!-- <v-dialog
         v-model="confirmationDialog"
         max-width="600px"
         @click:outside="closeConfirmationDialog(false)"
@@ -51,24 +53,16 @@
           <v-card-actions
             :class="['pa-2', confirmDialogColor.split(' ')[0], 'darken-3']"
           >
-            <v-btn
-              text
-              
-              @click="closeConfirmationDialog(true)"
-              color="white"
+            <v-btn text @click="closeConfirmationDialog(true)" color="white"
               ><v-icon>mdi-checkbox-marked-circle</v-icon>Yes</v-btn
             >
             <v-spacer />
-            <v-btn
-              text
-
-              @click="closeConfirmationDialog(false)"
-              color="white"
+            <v-btn text @click="closeConfirmationDialog(false)" color="white"
               >No <v-icon>mdi-cancel</v-icon></v-btn
             >
           </v-card-actions>
         </v-card>
-      </v-dialog>
+      </v-dialog> -->
       <!-- Confirmation dialog END -->
       <NoteItem
         v-for="note in notes"
@@ -77,9 +71,10 @@
         editable
         @note:edit="editNote"
         @note:delete="openConfirmationDialog($event, 'delete', false)"
+        @note:update:silent="updateNote"
       />
     </v-row>
-    <v-card-text style="height: 100px; position: relative;" >
+    <v-card-text style="height: 100px; position: relative;">
       <v-btn absolute dark fab top right color="pink" @click="newNote"
         ><v-icon>mdi-plus</v-icon></v-btn
       >
@@ -91,6 +86,7 @@
 import axios from 'axios'
 import NoteItem from './NoteItem.vue'
 import NoteDialog from './NoteDialog.vue'
+import CardConfirm from './CardConfirm.vue'
 
 const API_URI = 'http://localhost:8081/api/v1'
 
@@ -101,20 +97,12 @@ const config = {
 const sleepAsync = (millis = 1000) =>
   new Promise(resolve => setTimeout(resolve, millis))
 
-const groupBy = (arr, r = 1) => {
-  const newarr = []
-  if (r == 0) return []
-  for (let i = 0; i < arr.length; i += r) {
-    newarr.push(arr.slice(i, i + r))
-  }
-  return newarr
-}
-
 export default {
   name: 'Notes',
   components: {
     NoteItem,
     NoteDialog,
+    'note-confirm': CardConfirm,
   },
   data: () => ({
     notes: config.callAPI
@@ -124,7 +112,7 @@ export default {
             _id: 1, // will be the _id from mongodb
             title: 'Call Mom',
             description: `She must be very worried. I'd better call her`,
-            color: '#000000',
+            color: '#ff0000',
             done: false,
           },
           {
@@ -138,7 +126,6 @@ export default {
     noteUpdated: false,
     noteEdited: {},
     noteFormMode: 'edit',
-    confirmationDialog: false,
     confirmationDialogMode: 'delete',
     comingFromDialog: false,
   }),
@@ -146,6 +133,14 @@ export default {
   //   this.getNotes()
   // },
   methods: {
+    async dismissNote({ note, edited }) {
+      console.log({ note, edited })
+      if (edited) {
+        this.openConfirmationDialog(note, 'confirmDismiss')
+      } else {
+        this.$refs.noteForm.close(true)
+      }
+    },
     async getNotes() {
       if (config.callAPI) {
         const resp = await axios.get(`${API_URI}/notes`)
@@ -156,7 +151,11 @@ export default {
     },
     async createNote({ title, description, color }) {
       const note = { title, description, color }
-      note._id = Math.max.apply(null, this.notes.map(n => n._id)) + 1
+      note._id =
+        Math.max.apply(
+          null,
+          this.notes.map(n => n._id)
+        ) + 1
       this.notes.push(note)
     },
     async saveNote({ current: { _id }, edit }) {
@@ -175,18 +174,6 @@ export default {
       })
     },
 
-    isColorDark(color) {
-      const rgb = groupBy([...color.slice(1)], 2)
-        .map(a => a.join(''))
-        .map(s => parseInt(s, 16))
-        .map(i => i / 255.0)
-
-      const lightness = [Math.max, Math.min]
-        .map(f => f.apply(null, rgb))
-        .reduce((a, b) => (a + b) / 2, 0)
-
-      return lightness >= 0.5
-    },
     newNote() {
       this.noteFormMode = 'create'
       this.$refs.noteForm.open()
@@ -222,35 +209,37 @@ export default {
           : this.confirmationDialogMode
 
       this.comingFromDialog = fromDialog
+      this.noteEdited = Object.assign({}, note)
       if (fromDialog) {
-        
         this.$refs.noteForm.close(false)
-        this.noteEdited = Object.assign({}, note)
       }
       const interval = setInterval(
         function () {
           clearInterval(interval)
-          this.confirmationDialog = true
+          this.$refs.confirm.open()
         }.bind(this),
         250
       )
     },
     closeConfirmationDialog(confirmed) {
-      this.confirmationDialog = false
+      this.$refs.confirm.close()
       const cb = function () {
         this.$refs.noteForm.open()
       }.bind(this)
-      if (confirmed === true ) {
+      if (confirmed === true) {
         // Confirmed
         this.closeDialog(false)
-        this.afterConfirmation(this.noteEdited).then(([alert, alertVerb, noteEdited]) => {
-          if (alert) {
-          this.$emit('alert:show', {
-            mode: 'ok',
-            text: `Note "<strong>${noteEdited.title}</strong>" ${alertVerb} successfully`,
-          })
-          }
-        })
+        this.afterConfirmation(this.noteEdited).then(
+          function ([alert, alertVerb, noteEdited]) {
+            if (alert) {
+              this.$emit('alert:show', {
+                mode: 'ok',
+                text: `Note "<strong>${noteEdited.title}</strong>" ${alertVerb} successfully`,
+              })
+            }
+            this.noteEdited = {}
+          }.bind(this)
+        )
         // TODO: add a catcher for API error
       } else if (this.comingFromDialog) {
         // Phew.
@@ -292,7 +281,7 @@ export default {
         confirmDismiss: [() => false, null],
       }[this.confirmationDialogMode]
 
-      return async (note) => {
+      return async note => {
         let answer = await cb[0](note)
         answer = typeof answer === 'boolean' ? answer : true
         return [answer, cb[1], note]

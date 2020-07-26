@@ -68,9 +68,7 @@
         <v-btn
           text
           @click="
-            mode === 'edit'
-              ? $emit('note:edit:close')
-              : $emit('note:dismiss', noteEdited)
+            $emit('note:dismiss', { note: noteEdited, edited: noteUpdated })
           "
           color="blue lighten-1"
           >Close</v-btn
@@ -100,12 +98,17 @@ export default {
     dialogOpen: false,
     noteCopy: {},
     formValid: true,
+    noteUpdated: false
   }),
   watch: {
-    noteEdited: _.debounce(function (val) {
-      if (typeof val.color === 'object') val.color =  val.color.hex
-      this.noteEdited = val
-    }.bind(this), 500)
+    noteEdited: _.debounce(
+      function (val) {
+        if (!this.noteUpdated) this.noteUpdated = true
+        if (typeof val.color === 'object') val.color = val.color.hex
+        this.noteEdited = val
+      },
+      500
+    ),
   },
   methods: {
     /**
@@ -119,6 +122,7 @@ export default {
       if (typeof note === 'object') {
         this.noteCopy = Object.assign({}, note)
         this.noteEdited = Object.assign({}, note)
+        this.noteUpdated = false
       }
 
       this.dialogOpen = true
@@ -128,6 +132,7 @@ export default {
       const lastEdit = Object.assign({}, this.noteEdited)
       if (removeNoteData) {
         this.noteEdited = {}
+        this.noteUpdated = false
       }
       return [this.noteCopy, lastEdit]
     },
@@ -136,8 +141,7 @@ export default {
     titleRules() {
       return [
         v =>
-          (v && v.trim().length > 2) ||
-          'Please be meaningful on your titles!',
+          (v && v.trim().length > 2) || 'Please be meaningful on your titles!',
       ]
     },
   },

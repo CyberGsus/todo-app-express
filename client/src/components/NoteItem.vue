@@ -1,43 +1,48 @@
 <template>
-  <v-col cols="6" sm="12" md="6" lg="3" class="ma-3" align-self="center">
+  <v-col cols="6" sm="12" md="6" lg="3" class="ma-3">
     <!-- Note card -->
-    <v-card
-      min-width="400px"
-      max-width="600px"
-      :dark="isLightColor(note.color)"
-    >
-      <v-container>
-        <v-card-title class="headline mb-1">
+    <v-card min-width="400px" max-width="600px" :color="cardColor">
+      <v-card @click.native="cardClick" elevation="4">
+        <v-card-title class="headline mb-1 pl-5" :style="cardTitleStyle">
           <v-row>
             <v-col cols="8">
-              {{ note.title }}
+              {{ noteCopy.title }}
             </v-col>
             <v-col cols="1">
-              <v-avatar :color="note.color" tile />
+              <v-icon v-if="noteCopy.done" :color="checkMarkColor"
+                >mdi-check-bold</v-icon
+              >
             </v-col>
-            <v-col offset="2" cols="1">
-              <v-icon v-if="note.done" color="green">mdi-check-bold</v-icon>
-            </v-col>
+            <v-col offset="2" cols="1"> </v-col>
           </v-row>
         </v-card-title>
-      </v-container>
-      <v-divider />
+      </v-card>
       <v-row class="px-3">
-        <v-card-text>
+        <v-card-text :style="{ color: buttonColor }">
           <v-col cols="10">
-            <p>{{ note.description }}</p>
+            <p>{{ noteCopy.description }}</p>
           </v-col>
         </v-card-text>
       </v-row>
       <v-card-actions v-if="editable">
         <v-btn
           text
-          :color="note.color"
-          @click="$emit('note:edit', note)"
+          bottom
+          left
+          :color="buttonColor"
+          @click="$emit('note:edit', noteCopy)"
           >Edit
         </v-btn>
         <v-spacer />
-          <v-btn text icon color="red lighten-2" @click="$emit('note:delete', note)"><v-icon>mdi-delete</v-icon></v-btn>
+        <v-btn
+          text
+          icon
+          bottom
+          right
+          :color="buttonColor"
+          @click="$emit('note:delete', noteCopy)"
+          ><v-icon>mdi-delete</v-icon></v-btn
+        >
       </v-card-actions>
     </v-card>
     <!-- Note card END -->
@@ -45,13 +50,13 @@
 </template>
 
 <script>
-import { getColorLightness } from '../helpers/colors'
+import convert from 'color-convert'
 export default {
   name: 'NoteItem',
   props: {
     editable: {
       type: Boolean,
-      default: false
+      default: false,
     },
     note: {
       title: {
@@ -71,33 +76,54 @@ export default {
       },
       color: {
         type: String,
+        default: '#ff0000',
         validator: function (value) {
           return /^#(?:[0-9a-f]{3}){1,2}$/i.test(value)
         },
       },
     },
   },
+  created() {
+    this.noteCopy = Object.assign({}, this.note)
+  },
   data: () => ({
-    formDialog: false,
-    noteEdited: {
-      title: '',
-      description: '',
-      done: false,
-      color: '#000',
-    },
+    noteCopy: {}
   }),
+  computed: {
+    checkMarkColor() {
+        //  NOTE: `this.note.color` is undefined when added to the list. why?
+      let [h, s, l] = convert.hex.hsl(this.noteCopy.color || '#ff0000')
+      l = (l < 50) * 100
+      const hex = '#' + convert.hsl.hex(h, s, l)
+      return hex
+    },
+    cardTitleStyle() {
+      return {
+        //  NOTE: `this.note.color` is undefined when added to the list. why?
+        'background-color': this.noteCopy.color || '#ff0000',
+        color: convert.hex.hsl(this.noteCopy.color || '#ff0000')[2] >= 50 ? 'black' : 'white'
+      }
+    },
+    cardColor() {
+        //  NOTE: `this.note.color` is undefined when added to the list. why?
+      let [h, s, l] = convert.hex.hsl(this.noteCopy.color || '#ff0000')
+      l -= l > 75 ? l * 0.25 : l * -0.25
+      return '#' + convert.hsl.hex(h, s, l)
+    },
+    buttonColor() {
+      return convert.hex.hsl(this.cardColor)[2] < 50 ? 'white' : 'black'
+    },
+  },
   methods: {
     isLightColor(color) {
-      return getColorLightness(color) > 0.5
+      return convert.hex.hsl(color)[2] > 50
     },
-    deleteNote() {
-      console.log('Delete note', this.note)
-      console.log('Maybe a confirmation dialog???')
-    },
-    saveNote() {
-      console.log('Saving note', this.note)
-      // emit an event to save the note
-    },
+    cardClick() {
+      if (this.editable) {
+        this.noteCopy.done = !this.noteCopy.done
+        this.$emit('note:update:silent', { current: Object.assign({}, this.note), edit: this.noteCopy })
+      }
+    }
   },
 }
 </script>

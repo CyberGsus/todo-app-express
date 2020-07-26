@@ -1,8 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <Alert :mode="alertMode" ref="alert" >
-        {{ alertText }}
+      <Alert ref="alert">
       </Alert>
       <Notes @alert:show="showAlert" />
     </v-main>
@@ -17,17 +16,13 @@ export default Vue.extend({
   name: 'App',
   components: {
     Notes,
-    Alert
+    Alert,
   },
-  data: () => ({
-    alertText: '',
-    alertMode: 0
-  }),
   methods: {
     showAlert({ mode, text }) {
       this.alertText = text.toString()
       this.$refs.alert.activate(['ok', 'alert', 'error'].indexOf(mode), text)
-    }
-  }
+    },
+  },
 })
 </script>
