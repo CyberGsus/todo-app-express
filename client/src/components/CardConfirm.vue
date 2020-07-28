@@ -26,53 +26,53 @@
 </template>
 
 <script>
-import NoteItem from './NoteItem'
-import ConfirmationDialog from './ConfirmationDialog'
-export default {
-  name: 'CardConfirm',
-  props: {
-    note: {
-      title: {
-        type: String,
-        required: true,
-        validator: val => val && val.trim().length > 3,
+  import NoteItem from './NoteItem'
+  import ConfirmationDialog from './ConfirmationDialog'
+  export default {
+    name: 'CardConfirm',
+    props: {
+      note: {
+        title: {
+          type: String,
+          required: true,
+          validator: val => val && val.trim().length > 3
+        },
+        description: String,
+        done: Boolean
       },
-      description: String,
-      done: Boolean,
+      mode: {
+        type: String,
+        default: 'delete',
+        validator: val => ['delete', 'add', 'dismiss'].indexOf(val) !== -1
+      }
     },
-    mode: {
-      type: String,
-      default: 'delete',
-      validator: val => ['delete', 'add', 'dismiss'].indexOf(val) !== -1,
+    components: {
+      'confirm-dialog': ConfirmationDialog,
+      NoteItem
     },
-  },
-  components: {
-    'confirm-dialog': ConfirmationDialog,
-    NoteItem,
-  },
-  computed: {
-    cardTitle() {
-      return {
-        delete: 'Delete Note',
-        dismiss: 'Discard Note',
-        add: 'Save Note',
-      }[this.mode]
+    computed: {
+      cardTitle() {
+        return {
+          delete: 'Delete Note',
+          dismiss: 'Discard Note',
+          add: 'Save Note'
+        }[this.mode]
+      },
+      cardColor() {
+        return {
+          delete: 'red',
+          dismiss: 'blue darken-2',
+          add: 'green'
+        }[this.mode]
+      }
     },
-    cardColor() {
-      return {
-        delete: 'red',
-        dismiss: 'blue darken-2',
-        add: 'green',
-      }[this.mode]
-    },
-  },
-  methods: {
-    open() {
-      this.$refs.innerDialog.open()
-    },
-    close() {
-      this.$refs.innerDialog.close()
-    },
-  },
-}
+    methods: {
+      open() {
+        this.$refs.innerDialog.open()
+      },
+      close() {
+        this.$refs.innerDialog.close()
+      }
+    }
+  }
 </script>

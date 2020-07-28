@@ -80,98 +80,101 @@
 </template>
 
 <script>
-// import _ from 'lodash'
-export default {
-  name: 'NoteDialog',
-  props: {
-    'colorSwatches' : {
-      type: Array,
-      default: []
-    },
-    mode: {
-      type: String,
-      required: true,
-      validator: val => ['edit', 'create'].indexOf(val) !== -1,
-    },
-  },
-  data: () => ({
-    noteEdited: {
-      title: '',
-      description: '',
-      color: '#ff0000',
-    },
-    dialogOpen: false,
-    noteCopy: {},
-    formValid: true,
-    noteUpdated: false,
-    updatedByProgram: false,
-  }),
-  created() {
-    this.$watch.noteEdited = this.noteWatch // _.debounce(this.noteWatch, 30)
-  },
-  methods: {
-    /**
-     * @description
-     *  If open is called with a note object,
-     *  then setup is made. If not, data is the same
-     *  as before. This is used for the delete confirmation
-     *  dialog
-     */
-    open(note) {
-      if (typeof note === 'object') {
-        this.noteCopy = Object.assign({}, note)
-        this.noteEdited = Object.assign({}, note)
-        this.noteUpdated = false
-        this.updatedByProgram = true
+  // import _ from 'lodash'
+  export default {
+    name: 'NoteDialog',
+    props: {
+      colorSwatches: {
+        type: Array,
+        default: () => []
+      },
+      mode: {
+        type: String,
+        required: true,
+        validator: val => ['edit', 'create'].indexOf(val) !== -1
       }
+    },
+    data: () => ({
+      noteEdited: {
+        title: '',
+        description: '',
+        color: '#ff0000'
+      },
+      dialogOpen: false,
+      noteCopy: {},
+      formValid: true,
+      noteUpdated: false,
+      updatedByProgram: false
+    }),
+    created() {
+      this.$watch.noteEdited = this.noteWatch // _.debounce(this.noteWatch, 30)
+    },
+    methods: {
+      /**
+       * @description
+       *  If open is called with a note object,
+       *  then setup is made. If not, data is the same
+       *  as before. This is used for the delete confirmation
+       *  dialog
+       */
+      open(note) {
+        if (typeof note === 'object') {
+          this.noteCopy = Object.assign({}, note)
+          this.noteEdited = Object.assign({}, note)
+          this.noteUpdated = false
+          this.updatedByProgram = true
+        }
 
-      this.dialogOpen = true
-    },
-    close(removeNoteData = true) {
-      this.dialogOpen = false
-      const lastEdit = Object.assign({}, this.noteEdited)
-      if (removeNoteData) {
-        this.noteEdited = {}
-        this.updatedByProgram = true
-        this.noteUpdated = false
+        this.dialogOpen = true
+      },
+      close(removeNoteData = true) {
+        this.dialogOpen = false
+        const lastEdit = Object.assign({}, this.noteEdited)
+        if (removeNoteData) {
+          this.noteEdited = {}
+          this.updatedByProgram = true
+          this.noteUpdated = false
+        }
+        this.$emit('note:form:close')
+        return [this.noteCopy, lastEdit]
+      },
+      // TODO: this not getting called on textarea @keydown
+      noteWatch(val, force = false, keyEvent = {}) {
+        if (
+          keyEvent instanceof KeyboardEvent &&
+          !/^[\w\d\s]$/.test(keyEvent.key)
+        )
+          return
+        if (this.updatedByProgram) {
+          this.updatedByProgram = false
+          if (!force) return
+        }
+        if (!this.noteUpdated) this.noteUpdated = true
+        if (typeof val.color === 'object') val.color = val.color.hex
+        this.noteEdited = val
+      },
+      greenButton() {
+        if (this.mode === 'edit') {
+          this.noteUpdated = false
+          this.$emit('note:update', {
+            current: this.noteCopy,
+            edit: this.noteEdited
+          })
+        } else {
+          this.$emit('note:submit', this.noteEdited)
+        }
       }
-      this.$emit('note:form:close')
-      return [this.noteCopy, lastEdit]
     },
-    // TODO: this not getting called on textarea @keydown
-    noteWatch(val, force = false, keyEvent = {}) {
-      if (keyEvent instanceof KeyboardEvent && !/^[\w\d\s]$/.test(keyEvent.key))
-        return
-      if (this.updatedByProgram) {
-        this.updatedByProgram = false
-        if (!force) return
+    computed: {
+      titleRules() {
+        return [
+          v =>
+            (v && v.trim().length > 2) || 'Please be meaningful on your titles!'
+        ]
+      },
+      validForm() {
+        return this.formValid && this.noteUpdated
       }
-      if (!this.noteUpdated) this.noteUpdated = true
-      if (typeof val.color === 'object') val.color = val.color.hex
-      this.noteEdited = val
-    },
-    greenButton() {
-      if (this.mode === 'edit') {
-        this.noteUpdated = false
-        this.$emit('note:update', {
-          current: this.noteCopy,
-          edit: this.noteEdited,
-        })
-      } else {
-        this.$emit('note:submit', this.noteEdited)
-      }
-    },
-  },
-  computed: {
-    titleRules() {
-      return [
-        v =>
-          (v && v.trim().length > 2) || 'Please be meaningful on your titles!',
-      ]
-    },
-    validForm() {
-      return this.formValid && this.noteUpdated
-    },
-  },
-}
+    }
+  }
 </script>

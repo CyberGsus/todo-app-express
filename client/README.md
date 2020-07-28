@@ -92,11 +92,19 @@ to spin up the development environment
 
   - [x] `note:edit:close` to `note:dismiss`
 
-- [x] Better looking cards
+- [ ] Better looking cards
 
   - [x] Make card description background a % lighter/darker color of the `note.color`
   - [x] Make card title background `note.color`
   - [x] Fix purple-ish cards
+  - [ ] Fixed-width cards
+
+- [ ] Code organization
+
+  - [ ] Move all related `Note` stuff to `src/components/notes`
+  - [ ] Move whatever I can away from `Notes.vue`
 
 - [ ] Clean attachment to API via environment variable
 - [ ] Make attachment to API actually work
+  - [ ] Use ajax for calls
+  - [ ] Catch errors and show them in alert

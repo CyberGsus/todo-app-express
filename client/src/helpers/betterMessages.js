@@ -16,7 +16,7 @@ const options = [
   'tasklists',
   'smoothLivePreview',
   'openLinksInNewWindow',
-  'simplifiedAutoLink',
+  'simplifiedAutoLink'
 ]
 
 options.forEach(opt => converter.setOption(opt, true))
@@ -36,7 +36,7 @@ export default (text, markdownSupport = false) => {
       'embed',
       'textarea',
       'frame',
-      'frameset',
-    ],
+      'frameset'
+    ]
   })
 }

@@ -32,39 +32,39 @@
 </template>
 
 <script>
-/*
+  /*
   mode: 'delete', 'add', 'dismiss'
 */
-export default {
-  name: 'ConfirmationDialog',
-  props: {
-    title: {
-      type: String,
-      required: true,
+  export default {
+    name: 'ConfirmationDialog',
+    props: {
+      title: {
+        type: String,
+        required: true
+      },
+      confirmText: {
+        type: String,
+        default: 'Yes'
+      },
+      dismissText: {
+        type: String,
+        default: 'No'
+      },
+      color: {
+        type: String,
+        default: '#fff'
+      }
     },
-    confirmText: {
-      type: String,
-      default: 'Yes',
-    },
-    dismissText: {
-      type: String,
-      default: 'No',
-    },
-    color: {
-      type: String,
-      default: '#fff',
-    },
-  },
-  data: () => ({
-    dialogOpen: false,
-  }),
-  methods: {
-    open() {
-      this.dialogOpen = true
-    },
-    close() {
-      this.dialogOpen = false
-    },
-  },
-}
+    data: () => ({
+      dialogOpen: false
+    }),
+    methods: {
+      open() {
+        this.dialogOpen = true
+      },
+      close() {
+        this.dialogOpen = false
+      }
+    }
+  }
 </script>
