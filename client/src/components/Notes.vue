@@ -1,8 +1,54 @@
 <template>
   <v-container>
+    <v-row justify="center" align="center">
+      <v-col cols="4">
+        <v-menu bottom left>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              @click.native="!false"
+              :color="selectedColor === null ? 'white' : selectedColor"
+              v-bind="attrs"
+              v-on="on"
+              :dark="selectedColor !== null && !isLightColor(selectedColor)"
+              >Filter by color</v-btn
+            >
+          </template>
+          <v-list>
+            <v-list-item v-for="color in colors" :key="color">
+              <v-btn
+                @click.native="selectedColor = color"
+                :color="color"
+              ></v-btn>
+            </v-list-item>
+            <v-list-item>
+              <v-btn
+                @click.native="selectedColor = null"
+                depressed
+                tile
+                color="white"
+              >
+                <v-icon>mdi-close</v-icon><span>No filter</span>
+              </v-btn>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </v-col>
+      <v-col cols="5" sm="5" md="7" lg="8">
+        <v-text-field
+          class="mt-8"
+          v-model="searchTerm"
+          filled
+          rounded
+          placeholder="Search your notes..."
+          prepend-inner-icon="mdi-magnify"
+        >
+        </v-text-field>
+      </v-col>
+    </v-row>
     <v-row justify="center">
       <NoteDialog
         :mode="noteFormMode"
+        :colorSwatches="swatches"
         @keydown="dialogKeyDown"
         ref="noteForm"
         @note:delete:confirm="openConfirmationDialog"
@@ -12,23 +58,42 @@
         @note:submit="openConfirmationDialog($event, 'add')"
         @note:form:close="onDialogClose"
       />
-      <note-confirm :note="noteEdited" ref="confirm" :mode="confirmationDialogMode" v-if="confirmationDialog"
-        @confirm:accept="closeConfirmationDialog(true)" @confirm:dismiss="closeConfirmationDialog(false)" @confirm:keydown="dialogKeyDown" />
-      <NoteItem
-        v-for="note in notes"
-        :key="note._id"
-        :note="note"
-        editable
-        @note:edit="editNote"
-        @note:delete="openConfirmationDialog($event, 'delete', false)"
-        @note:update:silent="saveNote"
+      <note-confirm
+        :note="noteEdited"
+        ref="confirm"
+        :mode="confirmationDialogMode"
+        v-if="confirmationDialog"
+        @confirm:accept="closeConfirmationDialog(true)"
+        @confirm:dismiss="closeConfirmationDialog(false)"
+        @confirm:keydown="dialogKeyDown"
       />
+      <v-card-text class="grey lighten-4">
+        <v-row>
+          <v-col
+            v-for="note in filteredNotes"
+            :key="note._id"
+            sm="12"
+            md="6"
+            lg="6"
+          >
+            <NoteItem
+              :note="note"
+              editable
+              @note:edit="editNote"
+              @note:delete="openConfirmationDialog($event, 'delete', false)"
+              @note:update:silent="saveNote"
+            />
+          </v-col>
+
+          <v-col sm="12" md="6" lg="6">
+            <NoteItem
+              dummy
+              @note:add="newNote"
+            />
+          </v-col>
+        </v-row>
+      </v-card-text>
     </v-row>
-    <v-card-text style="height: 100px; position: relative;">
-      <v-btn absolute dark fab top right color="pink" @click="newNote"
-        ><v-icon>mdi-plus</v-icon></v-btn
-      >
-    </v-card-text>
   </v-container>
 </template>
 
@@ -37,6 +102,7 @@ import axios from 'axios'
 import NoteItem from './NoteItem.vue'
 import NoteDialog from './NoteDialog.vue'
 import CardConfirm from './CardConfirm.vue'
+import convert from 'color-convert'
 
 const API_URI = 'http://localhost:8081/api/v1'
 
@@ -62,7 +128,8 @@ export default {
             _id: 1, // will be the _id from mongodb
             title: 'Call Mom',
             description: `She must be very worried. I'd better call her`,
-            color: '#ff0000',
+            //  color: '#ff0000',
+            color: '#000000',
             done: false,
           },
           {
@@ -73,12 +140,14 @@ export default {
             color: '#cccccc',
           },
         ],
+    searchTerm: '',
     noteUpdated: false,
     noteEdited: {},
     noteFormMode: 'edit',
     confirmationDialogMode: 'delete',
     confirmationDialog: false,
     comingFromDialog: false,
+    selectedColor: null,
   }),
   // async mounted() {
   //   this.getNotes()
@@ -135,7 +204,6 @@ export default {
       this.$refs.noteForm.open(note)
     },
     onDialogClose() {
-
       if (this.noteUpdated) {
         this.$emit('alert:show', {
           mode: 'ok',
@@ -150,11 +218,11 @@ export default {
     updateNote({ current: { _id }, edit }) {
       this.noteUpdated = true
       this.notes = this.notes.map(note => {
-        let tmp  = note
+        let tmp = note
         if (note._id === _id) {
-          tmp =  Object.assign(note, edit)
+          tmp = Object.assign(note, edit)
         }
-        return tmp 
+        return tmp
       })
     },
     openConfirmationDialog(note, mode = 'delete', fromDialog = true) {
@@ -214,9 +282,32 @@ export default {
         else this.closeDialog()
       }
     },
+    isIncluded(note) {
+      return (
+        [note.title, note.description]
+          .map(a => a.toLowerCase())
+          .reduce(
+            (a, b) => a || b.includes(this.searchTerm.toLowerCase()),
+            false
+          ) &&
+        (this.selectedColor === null ||
+          note.color.toLowerCase() === this.selectedColor.toLowerCase())
+      )
+    },
     log: console.log,
+    isLightColor(c) {
+      return convert.hex.hsl(c)[2] > 40
+    },
   },
   computed: {
+    colors() {
+      return [...new Set(this.notes.map(n => n.color))]
+    },
+    swatches() {
+      return this.colors
+        .filter((_, i) => i % 3 === 0)
+        .map((_, i) => (i *= 3, this.colors.slice(i, i + 3)))
+    },
     confirmDialogTitle() {
       return {
         delete: 'Delete Note',
@@ -243,6 +334,9 @@ export default {
         answer = typeof answer === 'boolean' ? answer : true
         return [answer, cb[1], note]
       }
+    },
+    filteredNotes() {
+      return this.notes.filter(this.isIncluded)
     },
   },
 }

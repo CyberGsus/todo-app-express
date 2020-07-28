@@ -1,8 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <Alert ref="alert">
-      </Alert>
+      <Alert ref="alert"> </Alert>
       <Notes @alert:show="showAlert" />
     </v-main>
   </v-app>

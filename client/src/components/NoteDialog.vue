@@ -28,11 +28,17 @@
             </v-row>
             <v-row justify="space-between">
               <v-col cols="9">
-                <v-checkbox v-model="noteEdited.done" label="Done" @click="noteWatch(noteEdited, true)"></v-checkbox>
+                <v-checkbox
+                  v-model="noteEdited.done"
+                  label="Done"
+                  @click="noteWatch(noteEdited, true)"
+                ></v-checkbox>
               </v-col>
               <v-spacer />
               <v-col>
                 <v-color-picker
+                  :show-swatches="colorSwatches.length > 0"
+                  :swatches="colorSwatches"
                   hide-inputs
                   v-model="noteEdited.color"
                   mode="hexa"
@@ -78,6 +84,10 @@
 export default {
   name: 'NoteDialog',
   props: {
+    'colorSwatches' : {
+      type: Array,
+      default: []
+    },
     mode: {
       type: String,
       required: true,
@@ -129,8 +139,9 @@ export default {
       return [this.noteCopy, lastEdit]
     },
     // TODO: this not getting called on textarea @keydown
-    noteWatch(val, force = false, keyEvent = {  }) {
-      if (keyEvent instanceof KeyboardEvent && !/^[\w\d\s]$/.test(keyEvent.key)) return
+    noteWatch(val, force = false, keyEvent = {}) {
+      if (keyEvent instanceof KeyboardEvent && !/^[\w\d\s]$/.test(keyEvent.key))
+        return
       if (this.updatedByProgram) {
         this.updatedByProgram = false
         if (!force) return

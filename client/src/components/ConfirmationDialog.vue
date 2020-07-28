@@ -24,7 +24,7 @@
         >
         <v-spacer />
         <v-btn text @click="$emit('confirm:dismiss')" color="white"
-                                                      >{{ dismissText }}<v-icon>mdi-cancel</v-icon></v-btn
+          >{{ dismissText }}<v-icon>mdi-cancel</v-icon></v-btn
         >
       </v-card-actions>
     </v-card>
@@ -40,19 +40,19 @@ export default {
   props: {
     title: {
       type: String,
-      required: true
+      required: true,
     },
     confirmText: {
       type: String,
-      default: 'Yes'
+      default: 'Yes',
     },
     dismissText: {
       type: String,
-      default: 'No'
+      default: 'No',
     },
     color: {
       type: String,
-      default: '#fff'
+      default: '#fff',
     },
   },
   data: () => ({

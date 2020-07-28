@@ -51,16 +51,16 @@ to spin up the development environment
   - [ ] By newest
   - [ ] By oldest
 
-- [ ] Filter notes
+- [x] Filter notes
 
-  - [ ] By content
-    - [ ] Title
-    - [ ] Description
-  - [ ] By color
-    - [ ] Fetch all the colors
-    - [ ] Make menu to decide what to filter
+  - [x] By content
+    - [x] Title
+    - [x] Description
+  - [x] By color
+    - [x] Fetch all the colors
+    - [x] Make menu to decide what color to filter
 
-- [ ] Add swatches from previous colors to the color picker
+- [x] Add swatches from previous colors to the color picker
 
   > - [ ] Convert the color picker to swatch one & add color picker for new swatches
 
