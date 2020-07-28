@@ -5,8 +5,8 @@
       <v-card @click.native="cardClick" elevation="4">
         <v-card-title class="headline mb-1 pl-5" :style="cardTitleStyle">
           <v-row>
-            <v-col cols="8">
-              {{ noteCopy.title }}
+            <v-col cols="8" v-html="betterText(noteCopy.title)">
+              {{ betterText(noteCopy.title) }}
             </v-col>
             <v-col cols="1" offset="2">
               <v-icon v-if="noteCopy.done" :color="checkMarkColor"
@@ -18,8 +18,7 @@
       </v-card>
       <v-row class="px-3">
         <v-card-text :style="{ color: buttonColor }">
-          <v-col cols="10">
-            <p>{{ noteCopy.description }}</p>
+          <v-col cols="10" v-html="betterText(noteCopy.description)">
           </v-col>
         </v-card-text>
       </v-row>
@@ -50,6 +49,8 @@
 
 <script>
 import convert from 'color-convert'
+import betterMessage from '../helpers/betterMessages'
+import hljs from 'highlight.js'
 export default {
   name: 'NoteItem',
   props: {
@@ -85,17 +86,20 @@ export default {
   created() {
     this.noteCopy = Object.assign({}, this.note)
   },
+  updated() {
+    this.$el.querySelectorAll('pre code').forEach(hljs.highlightBlock)
+  },
   data: () => ({
     noteCopy: {},
   }),
   watch: {
     note(val) {
       this.noteCopy = Object.assign({}, val)
-    }
+    },
   },
   computed: {
     checkMarkColor() {
-        //  NOTE: `this.note.color` is undefined when added to the list. why?
+      //  NOTE: `this.note.color` is undefined when added to the list. why?
       let [h, s, l] = convert.hex.hsl(this.noteCopy.color || '#ff0000')
       l = (l < 50) * 100
       const hex = '#' + convert.hsl.hex(h, s, l)
@@ -105,13 +109,17 @@ export default {
       return {
         //  NOTE: `this.note.color` is undefined when added to the list. why?
         'background-color': this.noteCopy.color || '#ff0000',
-        color: convert.hex.hsl(this.noteCopy.color || '#ff0000')[2] >= 50 ? 'black' : 'white'
+        color:
+          convert.hex.hsl(this.noteCopy.color || '#ff0000')[2] >= 50
+            ? 'black'
+            : 'white',
       }
     },
     cardColor() {
-        //  NOTE: `this.note.color` is undefined when added to the list. why?
+      //  NOTE: `this.note.color` is undefined when added to the list. why?
       let [h, s, l] = convert.hex.hsl(this.noteCopy.color || '#ff0000')
-      l -= l > 75 ? l * 0.25 : l * -0.25
+      l -= l > 75 ? l * 0.25 : l * -0.45
+      s *= 0.95
       return '#' + convert.hsl.hex(h, s, l)
     },
     buttonColor() {
@@ -125,9 +133,23 @@ export default {
     cardClick() {
       if (this.editable) {
         this.noteCopy.done = !this.noteCopy.done
-        this.$emit('note:update:silent', { current: Object.assign({}, this.note), edit: this.noteCopy })
+        this.$emit('note:update:silent', {
+          current: Object.assign({}, this.note),
+          edit: this.noteCopy,
+        })
       }
+    },
+    betterText(t) {
+      return betterMessage(t, true)
     },
   },
 }
 </script>
+
+
+<style lang="scss" scoped>
+pre, code {
+  color: none;
+  background-color: none;
+}
+</style>

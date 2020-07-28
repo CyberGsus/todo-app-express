@@ -38,6 +38,7 @@ to spin up the development environment
 
 - [x] Fix dialog recursion when called 2nd time
 - [x] Note does not update `done` property when clicked, if it has been recently added to the notes list
+- [ ] Remove Vuetify styling for `<code>` tags on `NoteItem`s
 
 ## :notebook: TODO
 
@@ -91,11 +92,11 @@ to spin up the development environment
 
   - [x] `note:edit:close` to `note:dismiss`
 
-- [ ] Better looking cards
+- [x] Better looking cards
 
   - [x] Make card description background a % lighter/darker color of the `note.color`
   - [x] Make card title background `note.color`
-  - [ ] Fix purple-ish cards
+  - [x] Fix purple-ish cards
 
 - [ ] Clean attachment to API via environment variable
 - [ ] Make attachment to API actually work

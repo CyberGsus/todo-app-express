@@ -14,27 +14,26 @@
                   required
                   :rules="titleRules"
                   v-model="noteEdited.title"
-                  @keydown="noteWatch(noteEdited, true)"
+                  @keydown="noteWatch(noteEdited, true, $event)"
                   outlined
                 ></v-text-field>
                 <v-textarea
                   clearable
                   v-model="noteEdited.description"
                   label="Description"
-                  @keydown="noteWatch(noteEdited, true)"
+                  @keydown="noteWatch(noteEdited, true, $event)"
                   outlined
                 ></v-textarea>
               </v-col>
             </v-row>
             <v-row justify="space-between">
               <v-col cols="9">
-                <v-checkbox v-model="noteEdited.done" label="Done"></v-checkbox>
+                <v-checkbox v-model="noteEdited.done" label="Done" @click="noteWatch(noteEdited, true)"></v-checkbox>
               </v-col>
               <v-spacer />
               <v-col>
                 <v-color-picker
                   hide-inputs
-                  @focus="noteWatch"
                   v-model="noteEdited.color"
                   mode="hexa"
                 ></v-color-picker>
@@ -130,7 +129,8 @@ export default {
       return [this.noteCopy, lastEdit]
     },
     // TODO: this not getting called on textarea @keydown
-    noteWatch(val, force = false) {
+    noteWatch(val, force = false, keyEvent = {  }) {
+      if (keyEvent instanceof KeyboardEvent && !/^[\w\d\s]$/.test(keyEvent.key)) return
       if (this.updatedByProgram) {
         this.updatedByProgram = false
         if (!force) return

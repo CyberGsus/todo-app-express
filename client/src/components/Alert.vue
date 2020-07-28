@@ -15,6 +15,7 @@
 </template>
 
 <script>
+import betterMessage from '../helpers/betterMessages'
 export default {
   name: 'Alert',
   data: () => ({
@@ -36,7 +37,7 @@ export default {
   methods: {
     activate(mode = 0, text = 'Alerted!') {
       this.mode = mode >= 0 && mode < 3 ? mode : 0
-      this.text = text.toString()
+      this.text = betterMessage(text)
       this.active = true
       const i = setInterval(
         function () {
@@ -46,6 +47,8 @@ export default {
         1500
       )
     },
+
   },
+
 }
 </script>
