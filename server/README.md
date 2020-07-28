@@ -7,5 +7,8 @@ file server to it as well.
 ## TODO
 
 - [ ] Docker-ize API
+
   - [ ] Mongodb
   - [ ] Build node API to container
+
+- [ ] Usage documentation
