@@ -36,17 +36,32 @@ to spin up the development environment
 
 ## :bug: Bugs
 
-- [ ] Note does not update `done` property when clicked, if it has been recently added to the notes list
+- [x] Fix dialog recursion when called 2nd time
+- [x] Note does not update `done` property when clicked, if it has been recently added to the notes list
 
 ## :notebook: TODO
 
-- [x] Fix dialog recursion when called 2nd time
 - [x] Make a dialog for confirm deleting a note
-  - [x] Actually delete the note
-- [ ] Convert the color picker to swatch one & add color picker for new swatches
 
-  - **Note**: This requires the front-end to fetch all colors from notes and sort
-    by unique
+  - [x] Actually delete the note
+
+- [ ] Sort notes
+
+  - [ ] By newest
+  - [ ] By oldest
+
+- [ ] Filter notes
+
+  - [ ] By content
+    - [ ] Title
+    - [ ] Description
+  - [ ] By color
+    - [ ] Fetch all the colors
+    - [ ] Make menu to decide what to filter
+
+- [ ] Add swatches from previous colors to the color picker
+
+  > - [ ] Convert the color picker to swatch one & add color picker for new swatches
 
 - [x] Create a button & form to add a new note
 

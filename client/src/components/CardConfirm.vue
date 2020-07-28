@@ -1,5 +1,11 @@
 <template>
-  <confirm-dialog :mode="mode" ref="innerDialog" v-on="$listeners">
+  <confirm-dialog
+    :mode="mode"
+    ref="innerDialog"
+    v-on="$listeners"
+    :title="cardTitle"
+    :color="cardColor"
+  >
     <b v-if="mode === 'delete'">
       Are you sure you want to delete note "{{ note.title }}"?<br />
       This is unrecoverable!
@@ -20,6 +26,7 @@
 </template>
 
 <script>
+import NoteItem from './NoteItem'
 import ConfirmationDialog from './ConfirmationDialog'
 export default {
   name: 'CardConfirm',
@@ -33,10 +40,31 @@ export default {
       description: String,
       done: Boolean,
     },
-    mode: String,
+    mode: {
+      type: String,
+      default: 'delete',
+      validator: val => ['delete', 'add', 'dismiss'].indexOf(val) !== -1,
+    },
   },
   components: {
     'confirm-dialog': ConfirmationDialog,
+    NoteItem,
+  },
+  computed: {
+    cardTitle() {
+      return {
+        delete: 'Delete Note',
+        dismiss: 'Discard Note',
+        add: 'Save Note',
+      }[this.mode]
+    },
+    cardColor() {
+      return {
+        delete: 'red',
+        dismiss: 'blue darken-2',
+        add: 'green',
+      }[this.mode]
+    },
   },
   methods: {
     open() {

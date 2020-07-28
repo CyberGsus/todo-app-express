@@ -6,64 +6,14 @@
         @keydown="dialogKeyDown"
         ref="noteForm"
         @note:delete:confirm="openConfirmationDialog"
-        @note:update="updateNote"
+        @note:update="saveNote"
         @note:edit:close="closeDialog"
         @note:dismiss="dismissNote"
-        @note:submit="openConfirmationDialog($event, 'confirmAdd')"
+        @note:submit="openConfirmationDialog($event, 'add')"
+        @note:form:close="onDialogClose"
       />
-      <note-confirm :note="noteEdited" ref="confirm" :mode="confirmationDialogMode"
+      <note-confirm :note="noteEdited" ref="confirm" :mode="confirmationDialogMode" v-if="confirmationDialog"
         @confirm:accept="closeConfirmationDialog(true)" @confirm:dismiss="closeConfirmationDialog(false)" @confirm:keydown="dialogKeyDown" />
-      <!-- <v-dialog
-        v-model="confirmationDialog"
-        max-width="600px"
-        @click:outside="closeConfirmationDialog(false)"
-        @keydown="dialogKeyDown"
-      >
-        <v-card :color="confirmDialogColor" dark>
-          <v-card-title class="heading mb-2">
-            <v-row align="center">
-              <v-col cols="1">
-                <v-icon>mdi-alert</v-icon>
-              </v-col>
-
-              {{ confirmDialogTitle }}?
-            </v-row>
-          </v-card-title>
-          <v-card-text color="white">
-            <b v-if="confirmationDialogMode === 'delete'">
-              Are you sure you want to delete note "{{ noteEdited.title }}" ?<br />
-              This is unrecoverable!
-            </b>
-            <template v-else>
-              <b
-                >Are you sure you want to
-                {{
-                  confirmationDialogMode.endsWith('Add') ? 'submit' : 'discard'
-                }}
-                this note?</b
-              >
-              <v-row>
-                <v-col cols="1" offset="1">
-                  <NoteItem :note="noteEdited" />
-                </v-col>
-              </v-row>
-            </template>
-          </v-card-text>
-          <v-divider />
-          <v-card-actions
-            :class="['pa-2', confirmDialogColor.split(' ')[0], 'darken-3']"
-          >
-            <v-btn text @click="closeConfirmationDialog(true)" color="white"
-              ><v-icon>mdi-checkbox-marked-circle</v-icon>Yes</v-btn
-            >
-            <v-spacer />
-            <v-btn text @click="closeConfirmationDialog(false)" color="white"
-              >No <v-icon>mdi-cancel</v-icon></v-btn
-            >
-          </v-card-actions>
-        </v-card>
-      </v-dialog> -->
-      <!-- Confirmation dialog END -->
       <NoteItem
         v-for="note in notes"
         :key="note._id"
@@ -71,7 +21,7 @@
         editable
         @note:edit="editNote"
         @note:delete="openConfirmationDialog($event, 'delete', false)"
-        @note:update:silent="updateNote"
+        @note:update:silent="saveNote"
       />
     </v-row>
     <v-card-text style="height: 100px; position: relative;">
@@ -127,6 +77,7 @@ export default {
     noteEdited: {},
     noteFormMode: 'edit',
     confirmationDialogMode: 'delete',
+    confirmationDialog: false,
     comingFromDialog: false,
   }),
   // async mounted() {
@@ -134,9 +85,8 @@ export default {
   // },
   methods: {
     async dismissNote({ note, edited }) {
-      console.log({ note, edited })
       if (edited) {
-        this.openConfirmationDialog(note, 'confirmDismiss')
+        this.openConfirmationDialog(note, 'dismiss')
       } else {
         this.$refs.noteForm.close(true)
       }
@@ -159,9 +109,10 @@ export default {
       this.notes.push(note)
     },
     async saveNote({ current: { _id }, edit }) {
+      this.noteUpdated = true
       this.notes = this.notes.map(note => {
         if (note._id === _id) {
-          return Object.assign(note, edit)
+          return Object.assign({}, edit)
         }
         return note
       })
@@ -183,8 +134,8 @@ export default {
       this.noteEdited = Object.assign({}, note)
       this.$refs.noteForm.open(note)
     },
-    closeDialog(removeNoteData = true) {
-      this.$refs.noteForm.close(removeNoteData)
+    onDialogClose() {
+
       if (this.noteUpdated) {
         this.$emit('alert:show', {
           mode: 'ok',
@@ -193,18 +144,23 @@ export default {
         this.noteUpdated = false
       }
     },
+    closeDialog(removeNoteData = true) {
+      this.$refs.noteForm.close(removeNoteData)
+    },
     updateNote({ current: { _id }, edit }) {
       this.noteUpdated = true
       this.notes = this.notes.map(note => {
+        let tmp  = note
         if (note._id === _id) {
-          return Object.assign(note, edit)
+          tmp =  Object.assign(note, edit)
         }
-        return note
+        return tmp 
       })
     },
     openConfirmationDialog(note, mode = 'delete', fromDialog = true) {
+      this.confirmationDialog = true
       this.confirmationDialogMode =
-        ['delete', 'confirmDismiss', 'confirmAdd'].indexOf(mode) !== -1
+        ['delete', 'dismiss', 'add'].indexOf(mode) !== -1
           ? mode
           : this.confirmationDialogMode
 
@@ -222,6 +178,7 @@ export default {
       )
     },
     closeConfirmationDialog(confirmed) {
+      this.confirmationDialog = false
       this.$refs.confirm.close()
       const cb = function () {
         this.$refs.noteForm.open()
@@ -263,22 +220,22 @@ export default {
     confirmDialogTitle() {
       return {
         delete: 'Delete Note',
-        confirmDismiss: 'Discard Note',
-        confirmAdd: 'Save Note',
+        dismiss: 'Discard Note',
+        add: 'Save Note',
       }[this.confirmationDialogMode]
     },
     confirmDialogColor() {
       return {
         delete: 'red',
-        confirmDismiss: 'blue darken-2',
-        confirmAdd: 'green',
+        dismiss: 'blue darken-2',
+        add: 'green',
       }[this.confirmationDialogMode]
     },
     afterConfirmation() {
       const cb = {
         delete: [this.deleteNote, 'deleted'],
-        confirmAdd: [this.createNote, 'created'],
-        confirmDismiss: [() => false, null],
+        add: [this.createNote, 'created'],
+        dismiss: [() => false, null],
       }[this.confirmationDialogMode]
 
       return async note => {

@@ -14,12 +14,14 @@
                   required
                   :rules="titleRules"
                   v-model="noteEdited.title"
+                  @keydown="noteWatch(noteEdited, true)"
                   outlined
                 ></v-text-field>
                 <v-textarea
                   clearable
                   v-model="noteEdited.description"
                   label="Description"
+                  @keydown="noteWatch(noteEdited, true)"
                   outlined
                 ></v-textarea>
               </v-col>
@@ -32,6 +34,7 @@
               <v-col>
                 <v-color-picker
                   hide-inputs
+                  @focus="noteWatch"
                   v-model="noteEdited.color"
                   mode="hexa"
                 ></v-color-picker>
@@ -52,15 +55,8 @@
         <v-spacer v-if="mode === 'edit'" />
         <v-btn
           text
-          :disabled="!formValid"
-          @click="
-            mode === 'edit'
-              ? $emit('note:update', {
-                  current: noteCopy,
-                  edit: noteEdited,
-                })
-              : $emit('note:submit', noteEdited)
-          "
+          :disabled="!validForm"
+          @click="greenButton"
           color="green lighten-1"
           >{{ mode === 'edit' ? 'Update' : 'Create' }} note</v-btn
         >
@@ -79,7 +75,7 @@
 </template>
 
 <script>
-import _ from 'lodash'
+// import _ from 'lodash'
 export default {
   name: 'NoteDialog',
   props: {
@@ -98,17 +94,11 @@ export default {
     dialogOpen: false,
     noteCopy: {},
     formValid: true,
-    noteUpdated: false
+    noteUpdated: false,
+    updatedByProgram: false,
   }),
-  watch: {
-    noteEdited: _.debounce(
-      function (val) {
-        if (!this.noteUpdated) this.noteUpdated = true
-        if (typeof val.color === 'object') val.color = val.color.hex
-        this.noteEdited = val
-      },
-      500
-    ),
+  created() {
+    this.$watch.noteEdited = this.noteWatch // _.debounce(this.noteWatch, 30)
   },
   methods: {
     /**
@@ -123,6 +113,7 @@ export default {
         this.noteCopy = Object.assign({}, note)
         this.noteEdited = Object.assign({}, note)
         this.noteUpdated = false
+        this.updatedByProgram = true
       }
 
       this.dialogOpen = true
@@ -132,9 +123,32 @@ export default {
       const lastEdit = Object.assign({}, this.noteEdited)
       if (removeNoteData) {
         this.noteEdited = {}
+        this.updatedByProgram = true
         this.noteUpdated = false
       }
+      this.$emit('note:form:close')
       return [this.noteCopy, lastEdit]
+    },
+    // TODO: this not getting called on textarea @keydown
+    noteWatch(val, force = false) {
+      if (this.updatedByProgram) {
+        this.updatedByProgram = false
+        if (!force) return
+      }
+      if (!this.noteUpdated) this.noteUpdated = true
+      if (typeof val.color === 'object') val.color = val.color.hex
+      this.noteEdited = val
+    },
+    greenButton() {
+      if (this.mode === 'edit') {
+        this.noteUpdated = false
+        this.$emit('note:update', {
+          current: this.noteCopy,
+          edit: this.noteEdited,
+        })
+      } else {
+        this.$emit('note:submit', this.noteEdited)
+      }
     },
   },
   computed: {
@@ -143,6 +157,9 @@ export default {
         v =>
           (v && v.trim().length > 2) || 'Please be meaningful on your titles!',
       ]
+    },
+    validForm() {
+      return this.formValid && this.noteUpdated
     },
   },
 }

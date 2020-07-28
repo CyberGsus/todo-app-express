@@ -8,12 +8,11 @@
             <v-col cols="8">
               {{ noteCopy.title }}
             </v-col>
-            <v-col cols="1">
+            <v-col cols="1" offset="2">
               <v-icon v-if="noteCopy.done" :color="checkMarkColor"
                 >mdi-check-bold</v-icon
               >
             </v-col>
-            <v-col offset="2" cols="1"> </v-col>
           </v-row>
         </v-card-title>
       </v-card>
@@ -87,8 +86,13 @@ export default {
     this.noteCopy = Object.assign({}, this.note)
   },
   data: () => ({
-    noteCopy: {}
+    noteCopy: {},
   }),
+  watch: {
+    note(val) {
+      this.noteCopy = Object.assign({}, val)
+    }
+  },
   computed: {
     checkMarkColor() {
         //  NOTE: `this.note.color` is undefined when added to the list. why?
@@ -123,7 +127,7 @@ export default {
         this.noteCopy.done = !this.noteCopy.done
         this.$emit('note:update:silent', { current: Object.assign({}, this.note), edit: this.noteCopy })
       }
-    }
+    },
   },
 }
 </script>
