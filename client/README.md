@@ -104,11 +104,11 @@ to spin up the development environment
   - [ ] Move all related `Note` stuff to `src/components/notes`
   - [ ] Move whatever I can away from `Notes.vue`
 
-- [ ] Clean attachment to API via environment variable
-- [ ] Make attachment to API actually work
+- [x] Clean attachment to API via variable
+- [x] Make attachment to API actually work
   - [x] Use axios for each call
-  - [ ] Catch errors and show them in alert
-    - [ ] Create
-    - [ ] Read
-    - [ ] Update
-    - [ ] Delete
+  - [x] Catch errors and show them in alert
+    - [x] Create
+    - [x] Read
+    - [x] Update
+    - [x] Delete
