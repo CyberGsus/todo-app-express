@@ -31,7 +31,6 @@
                 <v-checkbox
                   v-model="noteEdited.done"
                   label="Done"
-                  @click="noteWatch(noteEdited, true)"
                 ></v-checkbox>
               </v-col>
               <v-spacer />
@@ -41,6 +40,10 @@
                   :swatches="colorSwatches"
                   hide-inputs
                   v-model="noteEdited.color"
+                  @update:color="
+                    noteUpdated = true
+                    noteEdited.color = $event.hex
+                  "
                   mode="hexa"
                 ></v-color-picker>
               </v-col>
@@ -156,13 +159,8 @@
       greenButton() {
         if (this.mode === 'edit') {
           this.noteUpdated = false
-          this.$emit('note:update', {
-            current: this.noteCopy,
-            edit: this.noteEdited
-          })
-        } else {
-          this.$emit('note:submit', this.noteEdited)
         }
+        this.$emit('note:submit', this.noteEdited)
       }
     },
     computed: {

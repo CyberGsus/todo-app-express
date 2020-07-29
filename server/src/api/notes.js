@@ -2,7 +2,13 @@ const express = require('express')
 const yup = require('yup')
 
 const notes = express.Router()
-const collection = require('../db').collection('todos')
+const { db, emitter } = require('../db')
+const collection = db.collection('todos')
+
+let dbConnected = false
+emitter.on('connected', () => {
+  dbConnected = true
+})
 
 const schema = yup.object().shape({
   title: yup.string().trim().min(3).required(),
@@ -12,6 +18,17 @@ const schema = yup.object().shape({
     .string()
     .default('#fff')
     .matches(/^#(?:[0-9a-f]{3}){1,2}$/i),
+})
+
+notes.use((req, res, next) => {
+  if (!dbConnected || res.headersSent) {
+    res
+      .status(500)
+      .json({
+        message: `Wait! I'm not ready yet! 😞`,
+      })
+      .end()
+  } else next()
 })
 
 notes.get('/', async (req, res, next) => {

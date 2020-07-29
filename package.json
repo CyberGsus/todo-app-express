@@ -1,0 +1,10 @@
+{
+  "name": "note-app-vue",
+  "description": "A simple note app with Vuetify frontend and Express backend",
+  "scripts": {
+    "setup:server": "cd server && yarn install",
+    "setup:client": "cd client && yarn install",
+    "setup:all": "yarn install:server && yarn install:client",
+    "start:server": "cd server && yarn start"
+  }
+}

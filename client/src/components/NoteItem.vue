@@ -5,7 +5,6 @@
       <v-card-title class="headline mb-1 pl-5" :style="cardTitleStyle">
         <v-row>
           <v-col cols="8" v-html="betterText(noteCopy.title)">
-            {{ betterText(noteCopy.title) }}
           </v-col>
           <v-col cols="1" offset="2">
             <v-icon v-if="noteCopy.done" :color="checkMarkColor"
@@ -155,10 +154,7 @@
       cardClick() {
         if (this.editable && !this.dummy) {
           this.noteCopy.done = !this.noteCopy.done
-          this.$emit('note:update:silent', {
-            current: Object.assign({}, this.note),
-            edit: this.noteCopy
-          })
+          this.$emit('note:update:silent', this.noteCopy)
         }
       },
       betterText(t) {

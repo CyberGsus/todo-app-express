@@ -1,5 +1,7 @@
 const express = require('express')
 const middlewares = require('./middlewares')
+const serverless = require('serverless-http')
+const fs = require('fs')
 
 const app = express()
 const endpoints = { api: '/api/v1' }
@@ -7,6 +9,10 @@ const endpoints = { api: '/api/v1' }
 require('dotenv').config()
 
 middlewares(app, endpoints)
+
+if (fs.existsSync('../public')) {
+  app.use('/', express.static('../public'))
+}
 
 if (process.env.NODE_ENV !== 'test') {
   const server = app.listen(process.env.PORT || 8080, () => {
@@ -17,4 +23,4 @@ if (process.env.NODE_ENV !== 'test') {
   })
 }
 
-module.exports = { app }
+module.exports = { app: serverless(app) }

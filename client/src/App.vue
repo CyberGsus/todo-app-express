@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <Alert ref="alert"> </Alert>
+      <Alert ref="alert" />
       <Notes @alert:show="showAlert" />
     </v-main>
   </v-app>
@@ -17,9 +17,11 @@
       Notes,
       Alert
     },
+    data: () => ({
+    }),
     methods: {
       showAlert({ mode, text }) {
-        this.alertText = text.toString()
+        text = text.toString()
         this.$refs.alert.activate(['ok', 'alert', 'error'].indexOf(mode), text)
       }
     }

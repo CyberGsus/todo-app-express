@@ -106,5 +106,9 @@ to spin up the development environment
 
 - [ ] Clean attachment to API via environment variable
 - [ ] Make attachment to API actually work
-  - [ ] Use ajax for calls
+  - [x] Use axios for each call
   - [ ] Catch errors and show them in alert
+    - [ ] Create
+    - [ ] Read
+    - [ ] Update
+    - [ ] Delete

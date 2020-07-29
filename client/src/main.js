@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import App from './App.vue'
 import vuetify from './plugins/vuetify'
-import highlightjs from 'highlight.js'
+import hljs from 'highlight.js'
 
 Vue.config.productionTip = false
 
-highlightjs.initHighlightingOnLoad()
+hljs.initHighlightingOnLoad()
 
 new Vue({
   vuetify,

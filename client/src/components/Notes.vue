@@ -51,8 +51,7 @@
         :colorSwatches="swatches"
         @keydown="dialogKeyDown"
         ref="noteForm"
-        @note:delete:confirm="openConfirmationDialog"
-        @note:update="saveNote"
+        @note:delete:confirm="openConfirmationDialog($event, 'delete')"
         @note:edit:close="closeDialog"
         @note:dismiss="dismissNote"
         @note:submit="openConfirmationDialog($event, 'add')"
@@ -73,7 +72,7 @@
             v-for="note in filteredNotes"
             :key="note._id"
             sm="12"
-            md="4"
+            md="6"
             lg="4"
           >
             <NoteItem
@@ -81,7 +80,7 @@
               editable
               @note:edit="editNote"
               @note:delete="openConfirmationDialog($event, 'delete', false)"
-              @note:update:silent="saveNote"
+              @note:update:silent="saveNote($event, true)"
             />
           </v-col>
 
@@ -103,12 +102,6 @@
 
   const API_URI = 'http://localhost:8081/api/v1'
 
-  const config = {
-    callAPI: false
-  }
-
-  const sleepAsync = (millis = 1000) =>
-    new Promise(resolve => setTimeout(resolve, millis))
 
   export default {
     name: 'Notes',
@@ -118,25 +111,7 @@
       'note-confirm': CardConfirm
     },
     data: () => ({
-      notes: config.callAPI
-        ? []
-        : [
-            {
-              _id: 1, // will be the _id from mongodb
-              title: 'Call Mom',
-              description: `She must be very worried. I'd better call her`,
-              //  color: '#ff0000',
-              color: '#fc5d7a',
-              done: false
-            },
-            {
-              _id: 2,
-              title: 'Hello World',
-              description: 'I am a teapot!',
-              done: true,
-              color: '#6e916a'
-            }
-          ],
+      notes: [],
       searchTerm: '',
       noteUpdated: false,
       noteEdited: {},
@@ -144,11 +119,26 @@
       confirmationDialogMode: 'delete',
       confirmationDialog: false,
       comingFromDialog: false,
-      selectedColor: null
+      selectedColor: null,
+      callAPI: false
     }),
-    // async mounted() {
-    //   this.getNotes()
-    // },
+    mounted() {
+        axios
+          .get(API_URI)
+          .then(() => {
+            // this.$emit('alert:show', { mode: 'ok', text: 'Backend is up!' })
+            this.callAPI = true
+            this.getNotes()
+          })
+          .catch(err => {
+            console.error(err)
+            this.$emit('alert:show', {
+              mode: 'alert',
+              text: 'Sorry, backend could not be reached!'
+            })
+            this.callAPI = false
+          })
+    },
     methods: {
       async dismissNote({ note, edited }) {
         if (edited) {
@@ -157,38 +147,114 @@
           this.$refs.noteForm.close(true)
         }
       },
-      async getNotes() {
-        if (config.callAPI) {
-          const resp = await axios.get(`${API_URI}/notes`)
-          this.notes = resp.data
+      getNotes() {
+        if (this.callAPI) {
+          return axios
+            .get(`${API_URI}/notes`)
+            .then(
+              function (response) {
+                this.notes = response.data
+              }.bind(this)
+            )
+            .catch(
+              function () {
+                this.$emit('alert:show', {
+                  mode: 'error',
+                  text: 'Could not fetch notes'
+                })
+              }.bind(this)
+            )
         } else {
-          await sleepAsync(250)
+          return new Promise(resolve => resolve(true))
         }
       },
-      async createNote({ title, description, color }) {
-        const note = { title, description, color }
-        note._id =
-          Math.max.apply(
-            null,
-            this.notes.map(n => n._id)
-          ) + 1
-        this.notes.push(note)
+      createNote({ title, description, color, done }) {
+        if (this.callAPI) {
+          return axios
+            .post(`${API_URI}/notes`, { title, description, color, done })
+            .then(
+              function (resp) {
+                this.notes.push(resp.data)
+              }.bind(this)
+            )
+            .catch(
+              function (err) {
+                console.error({ from: 'create', err })
+                this.$emit('alert:show', {
+                  mode: 'error',
+                  text: '<strong>Error at creating note!</strong>'
+                })
+              }.bind(this)
+            )
+        } else {
+          const note = { title, description, color, done }
+          note._id =
+            Math.max.apply(
+              null,
+              this.notes.map(n => n._id)
+            ) + 1
+          this.notes.push(note)
+          return new Promise(resolve => resolve(true)) // instant resolution
+        }
       },
-      async saveNote({ current: { _id }, edit }) {
-        this.noteUpdated = true
-        this.notes = this.notes.map(note => {
-          if (note._id === _id) {
-            return Object.assign({}, edit)
-          }
-          return note
-        })
+      saveNote(edit, silent = false) {
+        const { _id } = edit
+        if (this.callAPI) {
+          return axios
+            .put(`${API_URI}/notes`, edit)
+            .then(
+              function ({ data: saved }) {
+                this.notes = this.notes.map(note => {
+                  if (note._id === saved._id) {
+                    return Object.assign({}, saved)
+                  }
+                  return note
+                })
+                return !silent
+              }.bind(this)
+            )
+            .catch(
+              function (err) {
+                console.error({ from: 'update', err })
+                this.$emit('alert:show', {
+                  mode: 'error',
+                  text: `Could not update "<strong>${edit.title}</strong>"`
+                })
+              }.bind(this)
+            ) // TODO: update local copy of data
+        } else {
+          this.noteUpdated = true
+          this.notes = this.notes.map(note => {
+            if (note._id === _id) {
+              return Object.assign({}, edit)
+            }
+            return note
+          })
+          return new Promise(resolve => resolve(true))
+        }
       },
 
-      async deleteNote({ _id }) {
-        // TODO: ASK FOR CONFIRMATION!!!
-        this.notes = this.notes.filter(note => {
-          return note._id !== _id
-        })
+      deleteNote(note) {
+        const { _id } = note
+        if (this.callAPI) {
+          return axios
+            .delete(`${API_URI}/notes/${_id}`)
+            .then(this.getNotes)
+            .catch(
+              function (err) {
+                console.error({ from: 'delete', err })
+                this.$emit('alert:show', {
+                  mode: 'error',
+                  text: `Could not delete "<strong>${note.title}</strong>" `
+                })
+              }.bind(this)
+            )
+        } else {
+          this.notes = this.notes.filter(note => {
+            return note._id !== _id
+          })
+          return new Promise(resolve => resolve(true))
+        }
       },
 
       newNote() {
@@ -211,16 +277,6 @@
       },
       closeDialog(removeNoteData = true) {
         this.$refs.noteForm.close(removeNoteData)
-      },
-      updateNote({ current: { _id }, edit }) {
-        this.noteUpdated = true
-        this.notes = this.notes.map(note => {
-          let tmp = note
-          if (note._id === _id) {
-            tmp = Object.assign(note, edit)
-          }
-          return tmp
-        })
       },
       openConfirmationDialog(note, mode = 'delete', fromDialog = true) {
         this.confirmationDialog = true
@@ -319,10 +375,18 @@
           add: 'green'
         }[this.confirmationDialogMode]
       },
+      addMethod() {
+        return this[
+          {
+            edit: 'saveNote',
+            create: 'createNote'
+          }[this.noteFormMode]
+        ]
+      },
       afterConfirmation() {
         const cb = {
           delete: [this.deleteNote, 'deleted'],
-          add: [this.createNote, 'created'],
+          add: [this.addMethod, 'created'],
           dismiss: [() => false, null]
         }[this.confirmationDialogMode]
 
