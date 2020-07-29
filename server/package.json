@@ -1,7 +1,7 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/app.js",
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",
@@ -25,10 +25,10 @@
     "singleQuote": true
   },
   "scripts": {
-    "dev": "yarn db > /dev/null 2>&1 & nodemon src/app.js",
-    "start": "yarn db > /dev/null 2>&1 & node src/app.js",
-    "db": "mkdir -p db; killall mongod; mongod --dbpath db",
-    "test": "yarn db > /dev/null 2>&1 & cross-env NODE_ENV=test jest --verbose; killall mongod",
-    "migrate": "yarn db > /dev/null 2>&1 & node src/migrate.js; killall mongod"
+    "dev": "yarn db:start > /dev/null 2>&1 & NODE_ENV=development nodemon src/app.js",
+    "start": "yarn db:start > /dev/null 2>&1 & node .",
+    "db:start": "mkdir -p db; killall mongod; mongod --dbpath db",
+    "test": "yarn db:start > /dev/null 2>&1 & cross-env NODE_ENV=test jest --verbose; killall mongod",
+    "db:migrate": "yarn db > /dev/null 2>&1 & node src/migrate.js; killall mongod"
   }
 }
