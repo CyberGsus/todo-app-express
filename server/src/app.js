@@ -1,6 +1,5 @@
 const express = require('express')
 const middlewares = require('./middlewares')
-const serverless = require('serverless-http')
 const fs = require('fs')
 
 const app = express()
@@ -20,7 +19,7 @@ if (fs.existsSync(__dirname + '/../public')) {
   app.use('/', express.static(__dirname + '/../public'))
 }
 
-if (['test', 'production'].indexOf(process.env.NODE_ENV) === -1) {
+if (process.NODE_ENV !== 'test') {
   const server = app.listen(process.env.PORT || 8080, () => {
     console.log(`💻 Listening on http://localhost:${server.address().port}`)
     if (endpoints.api) {
@@ -29,4 +28,4 @@ if (['test', 'production'].indexOf(process.env.NODE_ENV) === -1) {
   })
 }
 
-module.exports = { app, handler: serverless(app) }
+module.exports = { app }
