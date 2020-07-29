@@ -13,12 +13,13 @@ To setup everything just do:
 
 ```bash
 git clone https://github.com/CyberGsus/todo-app-express.git
+cd todo-app-express
 ```
 
 2. Install dependencies
 
 ```bash
-yarn setup:*
+yarn setup:\*
 ```
 
 3. Build client side

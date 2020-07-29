@@ -5,8 +5,11 @@
   "scripts": {
     "setup:server": "cd server && yarn install",
     "setup:client": "cd client && yarn install",
+    "setup:*": "yarn setup:server && yarn setup:client",
     "start:server": "cd server && yarn start",
     "build:client": "mkdir -p server/public && cd client && yarn build",
-    "build:clean": "rm -rf server/public"
+    "clean:db": "rm -rf server/db",
+    "clean:build": "rm -rf server/public",
+    "clean:*": "yarn clean:build && yarn clean:db"
   }
 }
