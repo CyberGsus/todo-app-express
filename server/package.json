@@ -25,10 +25,12 @@
     "singleQuote": true
   },
   "scripts": {
-    "dev": "yarn db:start > /dev/null 2>&1 & NODE_ENV=development nodemon src/app.js",
-    "start": "yarn db:start > /dev/null 2>&1 & node .",
+    "dev:db": "npm run db:start > /dev/null 2>&1 & npm run dev",
+    "dev": "NODE_ENV=development nodemon .",
+    "start:db": "npm run db:start > /dev/null 2>&1 & node .",
+    "start:docker": "node .",
     "db:start": "mkdir -p db; killall mongod; mongod --dbpath db",
-    "test": "yarn db:start > /dev/null 2>&1 & cross-env NODE_ENV=test jest --verbose; killall mongod",
-    "db:migrate": "yarn db > /dev/null 2>&1 & node src/migrate.js; killall mongod"
+    "test": "npm run db:start > /dev/null 2>&1 & cross-env NODE_ENV=test jest --verbose; killall mongod",
+    "db:migrate": "npm run db > /dev/null 2>&1 & node src/migrate.js; killall mongod"
   }
 }

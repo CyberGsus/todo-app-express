@@ -21,7 +21,7 @@ if (fs.existsSync(__dirname + '/../public')) {
 
 if (process.NODE_ENV !== 'test') {
   const server = app.listen(process.env.PORT || 8080, () => {
-    console.log(`💻 Listening on http://localhost:${server.address().port}`)
+    console.log(`💻 Listening on http://0.0.0.0:${server.address().port}`)
     if (endpoints.api) {
       console.log(`API @ ${endpoints.api}`)
     }

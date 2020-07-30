@@ -84,7 +84,7 @@
             />
           </v-col>
 
-          <v-col sm="12" md="6" lg="6">
+          <v-col sm="12" md="6" lg="4">
             <NoteItem dummy @note:add="newNote" />
           </v-col>
         </v-row>
@@ -100,7 +100,7 @@
   import CardConfirm from './CardConfirm.vue'
   import convert from 'color-convert'
 
-  const API_URI = 'http://localhost:8081/api/v1'
+  const API_URI = '/api/v1'
 
 
   export default {

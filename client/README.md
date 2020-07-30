@@ -19,17 +19,17 @@ git clone https://github.com/CyberGsus/todo-app-express`
 cd todo-app-express/client
 ```
 
-3. Install packages (`yarn` recommended)
+3. Install packages (`npm run` recommended)
 
 ```bash
-yarn install
+npm run install
 ```
 
 4. Have some fun!
    Use
 
 ```
-yarn serve
+npm run serve
 ```
 
 to spin up the development environment

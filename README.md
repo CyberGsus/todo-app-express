@@ -19,13 +19,13 @@ cd todo-app-express
 2. Install dependencies
 
 ```bash
-yarn setup:\*
+npm run setup:\*
 ```
 
 3. Build client side
 
 ```bash
-yarn build:client
+npm run build:client
 ```
 
 4. Go to server side
@@ -43,8 +43,17 @@ rm -rf db
 6. Start server
 
 ```
-yarn start
+npm run start
 ```
+
+## Dockerize
+
+To dockerize the app, you have 2 options, with client and without client
+In order to build the app with the client just do `npm run build:client` before
+`docker-compose up/build`
+
+- There's a development `docker-compose` version, use this one to build the server
+  and use `nodemon`
 
 ## Notes
 
