@@ -48,12 +48,19 @@ npm run start
 
 ## Dockerize
 
+### Build your own image
+
 To dockerize the app, you have 2 options, with client and without client
 In order to build the app with the client just do `npm run build:client` before
 `docker-compose up/build`
 
 - There's a development `docker-compose` version, use this one to build the server
   and use `nodemon`
+
+### Already built images
+
+- `cybercyclonic/notes-app:api-only` contains the API only, you can override default environment with `MONGO_URI` and `PORT`
+- `cybercyclonic/notes-app:latest` contains the API with built client
 
 ## Notes
 
