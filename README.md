@@ -16,6 +16,23 @@ git clone https://github.com/CyberGsus/todo-app-express.git
 cd todo-app-express
 ```
 
+You can do either [container setup](#container-setup-with-docker-compose) or [local setup](#local-setup)
+
+### Container setup with `docker-compose`
+
+**Note** that this works only on linux containers.<br>
+
+2. If you have `docker-compose` installed, just run
+
+```bash
+docker-compose up
+```
+
+from the root directory. This will spin up the server on port
+`8080`
+
+### Local setup
+
 2. Install dependencies
 
 ```bash

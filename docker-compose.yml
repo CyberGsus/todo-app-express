@@ -2,11 +2,8 @@ version: '3'
 services:
   api:
     image: cybercyclonic/notes-app:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
-      args:
-        PORT: ${PORT}
+    environment:
+      - PORT=8080
     ports:
       - ${PORT}:${PORT}
 
